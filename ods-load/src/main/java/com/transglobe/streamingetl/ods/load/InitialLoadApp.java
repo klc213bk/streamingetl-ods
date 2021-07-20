@@ -150,13 +150,13 @@ public class InitialLoadApp {
 
 			// create sink table
 			logger.info(">>>  Start: dropTable");
-			app.dropTable(app.sinkTableContractProductLog);
+//			app.dropTable(app.sinkTableContractProductLog);
 			app.dropTable(app.sinkTableProductionDetail);
 			app.dropTable(app.sinkTableStreamingEtlHealth);
 			logger.info(">>>  End: dropTable DONE!!!");
 
 			logger.info(">>>  Start: createTable");			
-			app.createTable(CREATE_TABLE_FILE_NAME_CONTRACT_PRODUCT_LOG);
+//			app.createTable(CREATE_TABLE_FILE_NAME_CONTRACT_PRODUCT_LOG);
 			app.createTable(CREATE_TABLE_FILE_NAME_PRODUCTION_DETAIL);
 			app.createTable(CREATE_STREAMING_ETL_HEALTH_TABLE_FILE_NAME);
 
@@ -606,9 +606,18 @@ public class InitialLoadApp {
 					+ ",POLICY_YEAR,PRODUCTION_VALUE,EFFECTIVE_DATE,HIERARCHY_DATE,PRODUCER_ID"
 					+ ",PRODUCER_POSITION,BENEFIT_TYPE,FEE_TYPE,CHARGE_MODE,PREM_LIST_ID"
 					+ ",COMM_ITEM_ID,POLICY_CHG_ID,EXCHANGE_RATE,RELATED_ID,INSURED_ID"
+					+ ",POL_PRODUCTION_VALUE,POL_CURRENCY_ID,HIERARCHY_EXIST_INDI,AGGREGATION_ID,PRODUCT_VERSION"
+					+ ",SOURCE_TABLE,SOURCE_ID,RESULT_LIST_ID,FINISH_TIME,INSERTED_BY"
+					+ ",UPDATED_BY,INSERT_TIME,UPDATE_TIME,INSERT_TIMESTAMP,UPDATE_TIMESTAMP"
+					+ ",COMMISSION_RATE,CHEQUE_INDI,PREM_ALLOCATE_YEAR,RECALCULATED_INDI,EXCLUDE_POLICY_INDI"
+					+ ",CHANNEL_ORG_ID,AGENT_CATE,YEAR_MONTH,CONVERSION_CATE,ORDER_ID"
+					+ ",ASSIGN_RATE,ACCEPT_ID"
 					+ ")"
 					+ " values (?,?,?,?,?,?,?,?,?,?"
 					+ " ,?,?,?,?,?,?,?,?,?,?"
+					+ " ,?,?,?,?,?,?,?,?,?,?"
+					+ " ,?,?,?,?,?,?,?,?,?,?"
+					+ " ,?,?,?,?,?,?,?"
 					+ ")");
 
 			Long count = 0L;
@@ -636,8 +645,35 @@ public class InitialLoadApp {
 				pstmt.setBigDecimal(19, rs.getBigDecimal("RELATED_ID"));
 				pstmt.setBigDecimal(20, rs.getBigDecimal("INSURED_ID"));
 				
+				pstmt.setBigDecimal(21, rs.getBigDecimal("POL_PRODUCTION_VALUE"));
+				pstmt.setBigDecimal(22, rs.getBigDecimal("POL_CURRENCY_ID"));
+				pstmt.setString(23, rs.getString("HIERARCHY_EXIST_INDI"));
+				pstmt.setBigDecimal(24, rs.getBigDecimal("AGGREGATION_ID"));
+				pstmt.setBigDecimal(25, rs.getBigDecimal("PRODUCT_VERSION"));
+				pstmt.setString(26, rs.getString("SOURCE_TABLE"));
+				pstmt.setBigDecimal(27, rs.getBigDecimal("SOURCE_ID"));
+				pstmt.setBigDecimal(28, rs.getBigDecimal("RESULT_LIST_ID"));
+				pstmt.setTimestamp(29, ((rs.getDate("FINISH_TIME") == null)? null : new Timestamp(rs.getDate("FINISH_TIME").getTime())));
+				pstmt.setBigDecimal(30, rs.getBigDecimal("INSERTED_BY"));
 				
-
+				pstmt.setBigDecimal(31, rs.getBigDecimal("UPDATED_BY"));
+				pstmt.setTimestamp(32, ((rs.getDate("INSERT_TIME") == null)? null : new Timestamp(rs.getDate("INSERT_TIME").getTime())));
+				pstmt.setTimestamp(33, ((rs.getDate("UPDATE_TIME") == null)? null : new Timestamp(rs.getDate("UPDATE_TIME").getTime())));
+				pstmt.setTimestamp(34, ((rs.getDate("INSERT_TIMESTAMP") == null)? null : new Timestamp(rs.getDate("INSERT_TIMESTAMP").getTime())));
+				pstmt.setTimestamp(35, ((rs.getDate("UPDATE_TIMESTAMP") == null)? null : new Timestamp(rs.getDate("UPDATE_TIMESTAMP").getTime())));
+				pstmt.setBigDecimal(36, rs.getBigDecimal("COMMISSION_RATE"));
+				pstmt.setString(37, rs.getString("CHEQUE_INDI"));
+				pstmt.setBigDecimal(38, rs.getBigDecimal("PREM_ALLOCATE_YEAR"));
+				pstmt.setString(39, rs.getString("RECALCULATED_INDI"));
+				pstmt.setString(40, rs.getString("EXCLUDE_POLICY_INDI"));
+				
+				pstmt.setBigDecimal(41, rs.getBigDecimal("CHANNEL_ORG_ID"));
+				pstmt.setString(42, rs.getString("AGENT_CATE"));
+				pstmt.setString(43, rs.getString("YEAR_MONTH"));
+				pstmt.setBigDecimal(44, rs.getBigDecimal("CONVERSION_CATE"));
+				pstmt.setBigDecimal(45, rs.getBigDecimal("ORDER_ID"));
+				pstmt.setBigDecimal(46, rs.getBigDecimal("ASSIGN_RATE"));
+				pstmt.setBigDecimal(47, rs.getBigDecimal("ACCEPT_ID"));
 				
 				pstmt.addBatch();
 
@@ -729,12 +765,12 @@ public class InitialLoadApp {
 			Connection sourceConn = this.sourceConnectionPool.getConnection();
 			List<Map<String, String>> tablemapList = new ArrayList<>();
 			
-			Map<String, String> tablemap1 = new HashMap<>();
-			tablemap1.put("TABLE_NAME", this.sourceTableContractProductLog);
-			tablemap1.put("SELECT_ID_SQL", "select min(LOG_ID) as MIN_ID, max(LOG_ID) as MAX_ID from " + this.sourceTableContractProductLog);
-			tablemap1.put("SELECT_SQL", "select a.* from " + this.sourceTableContractProductLog + " a where ? <= a.log_id and a.log_id < ?");
-			tablemap1.put("COUNT_SQL", "select count(*) as CNT from " + this.sourceTableContractProductLog + " a where ? <= a.log_id and a.log_id < ?");
-			tablemapList.add(tablemap1);
+//			Map<String, String> tablemap1 = new HashMap<>();
+//			tablemap1.put("TABLE_NAME", this.sourceTableContractProductLog);
+//			tablemap1.put("SELECT_ID_SQL", "select min(LOG_ID) as MIN_ID, max(LOG_ID) as MAX_ID from " + this.sourceTableContractProductLog);
+//			tablemap1.put("SELECT_SQL", "select a.* from " + this.sourceTableContractProductLog + " a where ? <= a.log_id and a.log_id < ?");
+//			tablemap1.put("COUNT_SQL", "select count(*) as CNT from " + this.sourceTableContractProductLog + " a where ? <= a.log_id and a.log_id < ?");
+//			tablemapList.add(tablemap1);
 			
 			Map<String, String> tablemap2 = new HashMap<>();
 			tablemap2.put("TABLE_NAME", this.sourceTableProductionDetail);
