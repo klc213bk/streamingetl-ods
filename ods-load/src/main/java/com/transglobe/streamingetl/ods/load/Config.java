@@ -14,24 +14,23 @@ public class Config {
 	public String sourceDbUsername;
 	public String sourceDbPassword;
 	
-	public String sourceTableContractProductLog;
 	public String sourceTableProductionDetail;
-	
-	public String healthDbDriver;
-	public String healthDbUrl;
-	public String healthDbUsername;
-	public String healthDbPassword;
-	
-	public String healthTableStreamingEtlHealthCdc;
 	
 	public String sinkDbDriver;
 	public String sinkDbUrl;
 
-	public String sinkTableContractProductLog;
 	public String sinkTableProductionDetail;
-	public String sinkTableStreamingEtlHealth;
-			
-
+	public String sinkTableSupplLogSync;
+	
+	public String logminerDbDriver;
+	public String logminerDbUrl;
+	public String logminerDbUsername;
+	public String logminerDbPassword;
+	
+	public String logminerTableLogminerScn;
+	
+	public String streamingName;
+	
 	public static Config getConfig(String fileName) throws Exception {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -47,24 +46,24 @@ public class Config {
 			dbConfig.sourceDbUrl = prop.getProperty("source.db.url");
 			dbConfig.sourceDbUsername = prop.getProperty("source.db.username");
 			dbConfig.sourceDbPassword = prop.getProperty("source.db.password");
-			
-			dbConfig.sourceTableContractProductLog = prop.getProperty("source.table.contract_product_log");
-			dbConfig.sourceTableProductionDetail = prop.getProperty("source.table.production_detail");
-			
-			dbConfig.healthDbDriver = prop.getProperty("health.db.driver");
-			dbConfig.healthDbUrl = prop.getProperty("health.db.url");
-			dbConfig.healthDbUsername = prop.getProperty("health.db.username");
-			dbConfig.healthDbPassword = prop.getProperty("health.db.password");
 
-			dbConfig.healthTableStreamingEtlHealthCdc = prop.getProperty("health.table.streaming_etl_health_cdc");
-			
+			dbConfig.sourceTableProductionDetail = prop.getProperty("source.table.production_detail");
+	
 			dbConfig.sinkDbDriver = prop.getProperty("sink.db.driver");
 			dbConfig.sinkDbUrl = prop.getProperty("sink.db.url");
 			
-			dbConfig.sinkTableContractProductLog = prop.getProperty("sink.table.contract_product_log");
 			dbConfig.sinkTableProductionDetail = prop.getProperty("sink.table.production_detail");
-			dbConfig.sinkTableStreamingEtlHealth = prop.getProperty("sink.table.streaming_etl_health");
-
+			dbConfig.sinkTableSupplLogSync = prop.getProperty("sink.table.suppl_log_sync");
+			
+			dbConfig.logminerDbDriver = prop.getProperty("logminer.db.driver");
+			dbConfig.logminerDbUrl = prop.getProperty("logminer.db.url");
+			dbConfig.logminerDbUsername = prop.getProperty("logminer.db.username");
+			dbConfig.logminerDbPassword = prop.getProperty("logminer.db.password");
+			
+			dbConfig.logminerTableLogminerScn = prop.getProperty("logminer.table.logminer_scn");
+			
+			dbConfig.streamingName = prop.getProperty("streaming.name");
+			
 			return dbConfig;
 		} catch (Exception e) {
 			throw e;
