@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.transglobe.streamingetl.ods.consumer.model.ProductionDetail;
-import com.transglobe.streamingetl.ods.consumer.model.StreamingEtlHealthCdc;
 
 public class ConsumerLoop2 implements Runnable {
 	static final Logger logger = LoggerFactory.getLogger(ConsumerLoop2.class);
@@ -136,13 +135,8 @@ public class ConsumerLoop2 implements Runnable {
 							logger.info("   >>>payload={}", payload.toPrettyString());
 							
 							ProductionDetail productionDetail = null;
-							if (StringUtils.equals(config.sourceTableStreamingEtlHealthCdc, tableName)) {
-								doHealth(sinkConn, objectMapper, payload);
-							} else if (StringUtils.equals(config.sourceTableProductionDetail, tableName)) {	
-								productionDetail = (payLoadData == null)? null : objectMapper.readValue(payLoadData, ProductionDetail.class);
-
-								logger.info("   >>>productionDetail={}", ((productionDetail == null)? null : ToStringBuilder.reflectionToString(productionDetail)));
-							}
+							ProductionDetail beforeProductionDetail = null;
+//					
 							
 							
 							sinkConn.commit();
@@ -186,38 +180,7 @@ public class ConsumerLoop2 implements Runnable {
 		consumer.wakeup();
 	}
 
-	private void doHealth(Connection conn, ObjectMapper objectMapper, JsonNode payload) throws Exception {
-		String data = payload.get("data").toString();
-		Long logminerTime = Long.valueOf(payload.get("TIMESTAMP").toString());
-		StreamingEtlHealthCdc healthCdc = objectMapper.readValue(data, StreamingEtlHealthCdc.class);
-
-		insertStreamingEtlHealth(conn, healthCdc, logminerTime);
-
-	}
-	private void insertStreamingEtlHealth(Connection conn, StreamingEtlHealthCdc healthSrc, long logminerTime) throws Exception {
-
-		String sql = null;
-		PreparedStatement pstmt = null;
-		try {
-			sql = "insert into " + config.sinkTableStreamingEtlHealth 
-					+ " (id,cdc_time,logminer_id,logminer_time,consumer_id,consumer_time) "
-					+ " values (?, ?, ?, ?, ? ,?)";
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setLong(1, System.currentTimeMillis());
-			pstmt.setLong(2, healthSrc.getCdctime());
-			pstmt.setString(3, "ods-logminer");
-			pstmt.setLong(4, logminerTime);
-			pstmt.setString(5, "ods-consumer");
-			pstmt.setLong(6, System.currentTimeMillis());
-
-			pstmt.executeUpdate();
-			pstmt.close();
-
-		} finally {
-			if (pstmt != null) pstmt.close();
-		}
-
-	}
+	
 //
 //	private void insertPartyContact(Connection sourceConn, Connection sinkConn, ProductionDetail productionDetail) throws Exception  {
 //		PreparedStatement pstmt = null;
