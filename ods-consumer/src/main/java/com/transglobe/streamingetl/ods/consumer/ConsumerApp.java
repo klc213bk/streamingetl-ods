@@ -17,12 +17,12 @@ public class ConsumerApp {
 	static final Logger logger = LoggerFactory.getLogger(ConsumerApp.class);
 
 	private static final String CONFIG_FILE_NAME = "config.properties";
-	
+
 	private static final int NUM_CONSUMERS = 1;
 
 	private static BasicDataSource sinkConnPool;
 	private static BasicDataSource sourceConnPool;
-	
+
 	public static void main(String[] args) { 
 		String profileActive = System.getProperty("profile.active", "");
 		String configFile = StringUtils.isBlank(profileActive)? CONFIG_FILE_NAME : profileActive + "/" + CONFIG_FILE_NAME;
@@ -36,22 +36,22 @@ public class ConsumerApp {
 		}
 
 		String groupId = config.groupId;
-		
+
 		sourceConnPool = new BasicDataSource();
 		sourceConnPool.setUrl(config.sourceDbUrl);
 		sourceConnPool.setUsername(config.sourceDbUsername);
 		sourceConnPool.setPassword(config.sourceDbPassword);
 		sourceConnPool.setDriverClassName(config.sourceDbDriver);
 		sourceConnPool.setMaxTotal(3);
-		
+
 		sinkConnPool = new BasicDataSource();
 		sinkConnPool.setUrl(config.sinkDbUrl);
 		sinkConnPool.setUsername(null);
 		sinkConnPool.setPassword(null);
 		sinkConnPool.setDriverClassName(config.sinkDbDriver);
 		sinkConnPool.setMaxTotal(3);
-		
-		ExecutorService executor = Executors.newFixedThreadPool(NUM_CONSUMERS);
+
+		ExecutorService executor = Executors.newFixedThreadPool(NUM_CONSUMERS + 2);
 
 		final List<ConsumerLoop2> consumers = new ArrayList<>();
 		for (int i = 0; i < NUM_CONSUMERS; i++) {
@@ -59,6 +59,11 @@ public class ConsumerApp {
 			consumers.add(consumer);
 			executor.submit(consumer);
 		}
+		Cleanup cleanup = new Cleanup(config);
+		executor.submit(cleanup);
+		
+		SyncScn syncScn = new SyncScn(config);
+		executor.submit(syncScn);
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
@@ -66,13 +71,24 @@ public class ConsumerApp {
 				for (ConsumerLoop2 consumer : consumers) {
 					consumer.shutdown();
 				} 
+				
+				cleanup.shutdown();
+				syncScn.shutdown();
+				
+				try {
+					if (sourceConnPool != null) sourceConnPool.close();
+					if (sinkConnPool != null) sinkConnPool.close();
+				} catch (Exception e) {
+					logger.error(">>>message={}, stack trace={}", e.getMessage(), ExceptionUtils.getStackTrace(e));
+				}
+
 				executor.shutdown();
 				try {
 					executor.awaitTermination(5000, TimeUnit.MILLISECONDS);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 					logger.error(">>>message={}, stack trace={}", e.getMessage(), ExceptionUtils.getStackTrace(e));
-					
+
 				}
 			}
 		});
