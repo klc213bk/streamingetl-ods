@@ -48,7 +48,7 @@ public class InitialLoadApp {
 
 	private static final String CONFIG_FILE_NAME = "config.properties";
 	private static final String CREATE_TABLE_FILE_NAME_PRODUCTION_DETAIL = "createtable-T_PRODUCTION_DETAIL.sql";
-	private static final String CREATE_SUPPLY_LOG_SYNC_TABLE_FILE_NAME = "createtable-T_SUPPL_LOG_SYNC.sql";
+	private static final String CREATE_SUPPL_LOG_SYNC_TABLE_FILE_NAME = "createtable-T_SUPPL_LOG_SYNC.sql";
 
 	private static final int THREADS = 15;
 
@@ -56,8 +56,6 @@ public class InitialLoadApp {
 
 	private BasicDataSource sourceConnectionPool;
 	private BasicDataSource sinkConnectionPool;
-	
-	private long currentScn = 0L;
 
 	static class LoadBean {
 		String tableName;
@@ -123,18 +121,17 @@ public class InitialLoadApp {
 			logger.info(">>>  Start: createTable");			
 			//			app.createTable(CREATE_TABLE_FILE_NAME_CONTRACT_PRODUCT_LOG);
 			app.createTable(CREATE_TABLE_FILE_NAME_PRODUCTION_DETAIL);
-			app.createTable(CREATE_SUPPLY_LOG_SYNC_TABLE_FILE_NAME);
-
+			app.createTable(CREATE_SUPPL_LOG_SYNC_TABLE_FILE_NAME);
 			logger.info(">>>  End: createTable DONE!!!");
 
 			// insert  T_LOGMINER_SCN
 			logger.info(">>>  Start: insert T_LOGMINER_SCN");
-			app.insertLogminerScn();
+			long currentScn = app.insertLogminerScn();
 			logger.info(">>>  End: insert T_LOGMINER_SCN");
 
 			// insert  sink T_SUPPL_LOG_SYNC
 			logger.info(">>>  Start: insert T_SUPPL_LOG_SYNC");
-			app.insertSupplLogSync();
+			app.deleteAndInsertSupplLogSync(currentScn);
 			logger.info(">>>  End: insert T_SUPPL_LOG_SYNC");
 
 			logger.info("init tables span={}, ", (System.currentTimeMillis() - t0));						
@@ -164,11 +161,12 @@ public class InitialLoadApp {
 		}
 
 	}
-	private void insertLogminerScn() throws Exception {
+	private long insertLogminerScn() throws Exception {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql = "";
+		long currentScn = 0L;
 		try {
 			Class.forName(config.logminerDbDriver);
 			conn = DriverManager.getConnection(config.logminerDbUrl, config.logminerDbUsername, config.logminerDbPassword);
@@ -184,7 +182,6 @@ public class InitialLoadApp {
 			sql = "select CURRENT_SCN from gv$database";
 			pstmt = conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
-			Long currentScn = 0L;
 			while (rs.next()) {
 				currentScn = rs.getLong("CURRENT_SCN");
 			}
@@ -221,8 +218,9 @@ public class InitialLoadApp {
 			if (conn != null) conn.close();
 
 		}
+		return currentScn;
 	}
-	private void insertSupplLogSync() throws Exception {
+	private void deleteAndInsertSupplLogSync(Long currentScn) throws Exception {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -274,7 +272,7 @@ public class InitialLoadApp {
 	}
 
 	private Map<String, String> loadProductionDetail(LoadBean loadBean){
-		//Console cnsl = null;
+		Console cnsl = null;
 		Map<String, String> map = new HashMap<>();
 		Connection sourceConn = null;
 		Connection sinkConn = null;
@@ -282,6 +280,7 @@ public class InitialLoadApp {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql = null;
+		long t0 = System.currentTimeMillis();
 		try {
 			sql = loadBean.selectSql;
 			sourceConn = this.sourceConnectionPool.getConnection();
@@ -377,30 +376,25 @@ public class InitialLoadApp {
 					pstmt.clearBatch();
 				}
 			}
-			//	if (startSeq % 50000000 == 0) {
-			//				
-			//cnsl = System.console();
-			//				logger.info("   >>>roletype={}, startSeq={}, count={}, span={} ", roleType, startSeq, count, (System.currentTimeMillis() - t0));
-			//cnsl.printf("   >>>table=%s, startSeq=%d, endSeq=%d, count=%d \n", loadBean.tableName, loadBean.startSeq, loadBean.endSeq, count);
-
-			//				cnsl.printf("   >>>roletype=" + roleType + ", startSeq=" + startSeq + ", count=" + count +", span=" + ",span=" + (System.currentTimeMillis() - t0));
-			//cnsl.flush();
-			//		}
 
 			pstmt.executeBatch();
 			if (count > 0) {
 				sinkConn.commit(); 
-				logger.info(">>>>> loadProductionDetail count={}, sql={}, startSeq={}, endSeq={}", count, sql, loadBean.startSeq, loadBean.endSeq);
+				cnsl = System.console();
+				cnsl.printf("   >>>insert into ProductionDetail count=%d, startSeq=%d, endSeq=%d, span=%d \n", count, loadBean.startSeq, loadBean.endSeq, (System.currentTimeMillis() - t0));
+				cnsl.flush();
+				//				logger.info(">>>>> insert into ProductionDetail count={}, sql={}, startSeq={}, endSeq={}", count, sql, loadBean.startSeq, loadBean.endSeq);
 			}
 
 
 		}  catch (Exception e) {
-			logger.error("message={}, stack trace={}", e.getMessage(), ExceptionUtils.getStackTrace(e));
 			map.put("RETURN_CODE", "-999");
 			map.put("SQL", sql);
 			map.put("SINK_TABLE", this.config.sinkTableProductionDetail);
 			map.put("ERROR_MSG", e.getMessage());
 			map.put("STACK_TRACE", ExceptionUtils.getStackTrace(e));
+			logger.error("message={}, error map={}", e.getMessage(), map);
+
 		} finally {
 			if (rs != null) {
 				try {
@@ -468,7 +462,8 @@ public class InitialLoadApp {
 
 			Map<String, String> tablemap2 = new HashMap<>();
 			tablemap2.put("TABLE_NAME", this.config.sourceTableProductionDetail);
-			tablemap2.put("SELECT_ID_SQL", "select min(DETAIL_ID) as MIN_ID, max(DETAIL_ID) as MAX_ID from " + this.config.sourceTableProductionDetail);
+			tablemap2.put("SELECT_MIN_ID_SQL", "select min(DETAIL_ID) as MIN_ID from " + this.config.sourceTableProductionDetail);
+			tablemap2.put("SELECT_MAX_ID_SQL", "select max(DETAIL_ID) as MAX_ID from " + this.config.sourceTableProductionDetail);
 			tablemap2.put("SELECT_SQL", "select a.* from " + this.config.sourceTableProductionDetail + " a where ? <= a.detail_id and a.detail_id < ?");
 			tablemap2.put("COUNT_SQL", "select count(*) as CNT from " + this.config.sourceTableProductionDetail + " a where ? <= a.detail_id and a.detail_id < ?");
 			tablemapList.add(tablemap2);
@@ -476,30 +471,48 @@ public class InitialLoadApp {
 			String table = null;
 			for (Map<String, String> map : tablemapList) {
 				table = map.get("TABLE_NAME");
-				sql = map.get("SELECT_ID_SQL");
-				String selectSql = map.get("SELECT_SQL");
-				String countSql = map.get("COUNT_SQL");
+
+				String selectSql = map.get("SELECT_SQL");			
 
 				//				sql = "select min(list_id) as MIN_LIST_ID, max(list_id) as MAX_LIST_ID from " 
 				//				+ table + " where list_id >= 31000000";
+
+				// select min id
+				logger.info("select min id");
+				sql = map.get("SELECT_MIN_ID_SQL");
 				pstmt = sourceConn.prepareStatement(sql);
 				rs = pstmt.executeQuery();
-				long maxId = 0;
 				long minId = 0;
 				while (rs.next()) {
 					minId = rs.getLong("MIN_ID");
+				}
+				rs.close();
+				pstmt.close();
+				logger.info("minId={}", minId);
+
+				// select max id
+				logger.info("select max id");
+				sql = map.get("SELECT_MAX_ID_SQL");
+				pstmt = sourceConn.prepareStatement(sql);
+				rs = pstmt.executeQuery();
+				long maxId = 0;
+				while (rs.next()) {
 					maxId = rs.getLong("MAX_ID");
 				}
 				rs.close();
 				pstmt.close();
+				logger.info("maxId={}", maxId);
+
 
 				long stepSize = 1000000;
 				long subStepSize = 10000;
 				long startIndex = minId;
 
+				String countSql = map.get("COUNT_SQL");
 				PreparedStatement cntPstmt = sourceConn.prepareStatement(countSql);
 				ResultSet cntRs = null;
 				List<LoadBean> loadBeanList = new ArrayList<>();
+				long recordCount = 0L;
 				while (startIndex <= maxId) {
 					long endIndex = startIndex + stepSize;
 					cntPstmt.setLong(1, startIndex);
@@ -509,38 +522,45 @@ public class InitialLoadApp {
 					if (cntRs.next()) {
 						cnt = cntRs.getInt("CNT");
 					}
-					if (cnt < 10000) {
-						LoadBean loadBean = new LoadBean();
-						loadBean.tableName = table;
-						loadBean.startSeq = startIndex;
-						loadBean.endSeq = endIndex;
-						loadBean.selectSql = selectSql;
-
-						loadBeanList.add(loadBean);
-
-					} else {
-						int j = 0;
-						while (true) {
+					recordCount += cnt;
+					int j = 0;
+					if (cnt > 0) {
+						if (cnt < 10000) {
 							LoadBean loadBean = new LoadBean();
 							loadBean.tableName = table;
-							loadBean.startSeq = startIndex + j * subStepSize;
-							loadBean.endSeq = startIndex + (j + 1) * subStepSize;
+							loadBean.startSeq = startIndex;
+							loadBean.endSeq = endIndex;
 							loadBean.selectSql = selectSql;
 
 							loadBeanList.add(loadBean);
 
 							j++;
+						} else {
 
-							if (loadBean.endSeq == endIndex) {
-								break;
+							while (true) {
+								LoadBean loadBean = new LoadBean();
+								loadBean.tableName = table;
+								loadBean.startSeq = startIndex + j * subStepSize;
+								loadBean.endSeq = startIndex + (j + 1) * subStepSize;
+								loadBean.selectSql = selectSql;
+
+								loadBeanList.add(loadBean);
+
+								j++;
+
+								if (loadBean.endSeq == endIndex) {
+									break;
+								}
 							}
 						}
 					}
+					logger.info("count table={}, startIndex= {}, endIndex={}, cnt={}, loadbeans={}", table, startIndex, endIndex, cnt, j);
+
 					startIndex = endIndex;
 
 				}
 
-				logger.info("table={}, maxId={}, minId={}, loadbean size={}", table, maxId, minId, loadBeanList.size());
+				logger.info("table={}, minId={}, maxId={}, loadbean size={}, recordCount={}", table, minId, maxId, loadBeanList.size(), recordCount);
 
 				List<CompletableFuture<Map<String, String>>> futures = 
 						loadBeanList.stream().map(t -> CompletableFuture.supplyAsync(
