@@ -84,7 +84,15 @@ public class Config {
 			dbConfig.sinkDbUsername = prop.getProperty("sink.db.username");
 			dbConfig.sinkDbPassword = prop.getProperty("sink.db.password");
 			
+			dbConfig.sinkTableCommisionFee = prop.getProperty("sink.table.commision_fee");
+			dbConfig.sinkTableContractExtendCx  = prop.getProperty("sink.table.contract_extend_cx");
+			dbConfig.sinkTableContractExtendLog = prop.getProperty("sink.table.contract_extend_log");
 			dbConfig.sinkTableContractProductLog = prop.getProperty("sink.table.contract_product_log");
+			dbConfig.sinkTableImage = prop.getProperty("sink.table.image");
+			dbConfig.sinkTableJbpmVariableinstance = prop.getProperty("sink.table.jbpm_variableinstance");
+			dbConfig.sinkTablePolicyChange = prop.getProperty("sink.table.policy_change");
+			dbConfig.sinkTablePolicyPrintJob = prop.getProperty("sink.table.policy_print_job");
+			dbConfig.sinkTableProductCommision = prop.getProperty("sink.table.product_commision");
 			dbConfig.sinkTableProductionDetail = prop.getProperty("sink.table.production_detail");
 			
 			dbConfig.sinkTableSupplLogSync = prop.getProperty("sink.table.suppl_log_sync");

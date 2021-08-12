@@ -68,6 +68,11 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.transglobe.streamingetl.common</groupId>
+			<artifactId>streamingetl-common</artifactId>
+			<version>1.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
