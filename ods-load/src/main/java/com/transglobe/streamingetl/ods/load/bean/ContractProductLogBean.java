@@ -19,6 +19,8 @@ import com.transglobe.streamingetl.ods.load.InitialLoadApp.LoadBean;
 public class ContractProductLogBean {
 	private static final Logger logger = LoggerFactory.getLogger(ContractProductLogBean.class);
 
+	private static int BATCH_COMMIT_SIZE = 5000;
+	
 	public static Map<String, String> loadToSinkTable(LoadBean loadBean, 
 			BasicDataSource sourceConnectionPool, BasicDataSource sinkConnectionPool){
 		Console cnsl = null;
@@ -333,7 +335,7 @@ public class ContractProductLogBean {
 
 				pstmt.addBatch();
 
-				if (count % 3000 == 0) {
+				if (count % BATCH_COMMIT_SIZE == 0) {
 					pstmt.executeBatch();//executing the batch  
 					sinkConn.commit(); 
 					pstmt.clearBatch();
@@ -343,13 +345,12 @@ public class ContractProductLogBean {
 			
 			pstmt.executeBatch();
 			if (count > 0) {
-				double avgTotal = (t2 - t0) / count;
+				double avgTotal = ((double)(t2 - t0)) / count;
 				sinkConn.commit(); 
 				cnsl = System.console();
-				cnsl.printf("   >>>insert into %s count=%d, startSeq=%d, endSeq=%d, queryspan=%d, insertspan=%d, avgTotal=%f.4 \n", 
+				cnsl.printf("   >>>insert into %s count=%d, startSeq=%d, endSeq=%d, queryspan=%d, insertspan=%d, avgTotal=%f \n", 
 						loadBean.sinkTableName, count, loadBean.startSeq, loadBean.endSeq, (t1 - t0), (t2 - t1), avgTotal);
 				cnsl.flush();
-				//				logger.info(">>>>> insert into ProductionDetail count={}, sql={}, startSeq={}, endSeq={}", count, sql, loadBean.startSeq, loadBean.endSeq);
 			}
 
 

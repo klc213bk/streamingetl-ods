@@ -1,11 +1,5 @@
 BEGIN
-	execute immediate 'CREATE INDEX "IDX_IMAGE_AUTH_CODE" ON "K_IMAGE" ("AUTH_CODE")';
-	execute immediate 'CREATE INDEX "IDX_IMAGE_LIST_ID" ON "K_IMAGE" ("LIST_ID")';
-	execute immediate 'CREATE INDEX "IDX_IMAGE__BOX_NO" ON "K_IMAGE" ("BOX_NO")';
-	execute immediate 'CREATE INDEX "IDX_IMAGE__CASE_ID" ON "K_IMAGE" ("CASE_ID")';
-	execute immediate 'CREATE INDEX "IDX_IMAGE__CHANGE_DI" ON "K_IMAGE" ("CHANGE_ID")';
-	execute immediate 'CREATE INDEX "IDX_IMAGE__FILE_CODE" ON "K_IMAGE" ("FILE_CODE")';
-	execute immediate 'CREATE INDEX "IDX_IMAGE__GRP_POLICY_ID" ON "K_IMAGE" ("GROUP_POLICY_ID")';
-	execute immediate 'CREATE INDEX "IDX_IMAGE__POLICY_ID" ON "K_IMAGE" ("POLICY_ID")';
-	execute immediate 'CREATE INDEX "IDX_IMAGE__SCAN_TIME" ON "K_IMAGE" ("SCAN_TIME", "IMAGE_TYPE_ID")';
+	execute immediate 'ALTER TABLE "K_IMAGE" ADD CONSTRAINT "K_IMAGE_X" PRIMARY KEY ("IMAGE_ID")';
+	execute immediate 'CREATE INDEX "K_IMAGE_IDXI" ON "K_IMAGE" ("IMAGE_TYPE_ID")';
+	execute immediate 'CREATE INDEX "K_IMAGE_IDXP" ON "K_IMAGE" ("POLICY_ID")';
 END;
