@@ -14,6 +14,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.transglobe.streamingetl.ods.load.InitialLoadApp;
 import com.transglobe.streamingetl.ods.load.InitialLoadApp.LoadBean;
 
 public class ContractProductLogBean {
@@ -35,7 +36,7 @@ public class ContractProductLogBean {
 		long t1 = 0L;
 		long t2 = 0L;
 		try {
-			sql = loadBean.selectSql;
+			sql = "";
 			sourceConn = sourceConnectionPool.getConnection();
 			sinkConn = sinkConnectionPool.getConnection();
 
@@ -49,7 +50,7 @@ public class ContractProductLogBean {
 			sinkConn.setAutoCommit(false); 
 
 			pstmt = sinkConn.prepareStatement(
-					"insert into " + loadBean.sinkTableName 
+					"insert into " + InitialLoadApp.SINK_TABLE_NAME_CONTRACT_PRODUCT_LOG 
 					+ " (CHANGE_ID,LOG_TYPE,POLICY_CHG_ID,ITEM_ID,MASTER_ID"
 					+ ",POLICY_ID,PRODUCT_ID,AMOUNT,UNIT,APPLY_DATE"
 					+ ",EXPIRY_DATE,VALIDATE_DATE,PAIDUP_DATE,LIABILITY_STATE,END_CAUSE"
@@ -349,7 +350,7 @@ public class ContractProductLogBean {
 				sinkConn.commit(); 
 				cnsl = System.console();
 				cnsl.printf("   >>>insert into %s count=%d, startSeq=%d, endSeq=%d, queryspan=%d, insertspan=%d, avgTotal=%f \n", 
-						loadBean.sinkTableName, count, loadBean.startSeq, loadBean.endSeq, (t1 - t0), (t2 - t1), avgTotal);
+						InitialLoadApp.SINK_TABLE_NAME_CONTRACT_PRODUCT_LOG , count, loadBean.startSeq, loadBean.endSeq, (t1 - t0), (t2 - t1), avgTotal);
 				cnsl.flush();
 			}
 
@@ -357,7 +358,7 @@ public class ContractProductLogBean {
 		}  catch (Exception e) {
 			map.put("RETURN_CODE", "-999");
 			map.put("SQL", sql);
-			map.put("SINK_TABLE", loadBean.sinkTableName);
+			map.put("SINK_TABLE", InitialLoadApp.SINK_TABLE_NAME_CONTRACT_PRODUCT_LOG );
 			map.put("ERROR_MSG", e.getMessage());
 			map.put("STACK_TRACE", ExceptionUtils.getStackTrace(e));
 			logger.error("message={}, error map={}", e.getMessage(), map);

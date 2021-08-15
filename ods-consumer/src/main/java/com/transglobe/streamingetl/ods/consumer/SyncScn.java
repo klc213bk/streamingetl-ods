@@ -101,7 +101,7 @@ public class SyncScn implements Runnable {
 					}
 				}
 				logger.info(">>> SyncScn sleep ");
-				Thread.sleep(config.syncscnPeriodMinute * 60 * 1000);
+//				Thread.sleep(config.syncscnPeriodMinute * 60 * 1000);
 				logger.info(">>> SyncScn wake up from sleep");
 			}
 		} catch (Exception e) {

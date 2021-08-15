@@ -14,12 +14,13 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.transglobe.streamingetl.ods.load.InitialLoadApp;
 import com.transglobe.streamingetl.ods.load.InitialLoadApp.LoadBean;
 
 public class ProductionDetailBean {
 	private static final Logger logger = LoggerFactory.getLogger(ProductionDetailBean.class);
 	
-	public static Map<String, String> loadToSinkTable(LoadBean loadBean, 
+	public static LoadBean loadToSinkTable(LoadBean loadBean, 
 			BasicDataSource sourceConnectionPool, BasicDataSource sinkConnectionPool){
 		Console cnsl = null;
 		Map<String, String> map = new HashMap<>();
@@ -30,8 +31,10 @@ public class ProductionDetailBean {
 		ResultSet rs = null;
 		String sql = null;
 		long t0 = System.currentTimeMillis();
+		long t1 = 0L;
+		long t2 = 0L;
 		try {
-			sql = loadBean.selectSql;
+			sql = "";
 			sourceConn = sourceConnectionPool.getConnection();
 			sinkConn = sinkConnectionPool.getConnection();
 
@@ -40,10 +43,12 @@ public class ProductionDetailBean {
 			pstmtSource.setLong(2, loadBean.endSeq);
 			rs = pstmtSource.executeQuery();
 
+			t1 = System.currentTimeMillis();
+			
 			sinkConn.setAutoCommit(false); 
 
 			pstmt = sinkConn.prepareStatement(
-					"insert into " + loadBean.sinkTableName
+					"insert into " + InitialLoadApp.SOURCE_TABLE_NAME_PRODUCTION_DETAIL
 					+ " (DETAIL_ID,PRODUCTION_ID,POLICY_ID,ITEM_ID,PRODUCT_ID"
 					+ ",POLICY_YEAR,PRODUCTION_VALUE,EFFECTIVE_DATE,HIERARCHY_DATE,PRODUCER_ID"
 					+ ",PRODUCER_POSITION,BENEFIT_TYPE,FEE_TYPE,CHARGE_MODE,PREM_LIST_ID"
@@ -119,27 +124,32 @@ public class ProductionDetailBean {
 
 				pstmt.addBatch();
 
-				if (count % 3000 == 0) {
+				if (count % InitialLoadApp.BATCH_COMMIT_SIZE == 0) {
 					pstmt.executeBatch();//executing the batch  
 					sinkConn.commit(); 
 					pstmt.clearBatch();
 				}
 			}
+			t2 = System.currentTimeMillis();
 
+			loadBean.count = count;
+			
 			pstmt.executeBatch();
 			if (count > 0) {
+				double avgSpan = ((double)(t2 - t0)) / count;
+				loadBean.span = t2 - t0;
 				sinkConn.commit(); 
 				cnsl = System.console();
-				cnsl.printf("   >>>insert into %s count=%d, startSeq=%d, endSeq=%d, span=%d \n", loadBean.sinkTableName, count, loadBean.startSeq, loadBean.endSeq, (System.currentTimeMillis() - t0));
+				cnsl.printf("   >>>insert into %s count=%d, seq=%d, loadBeanSize=%d, startSeq=%d, endSeq=%d, span=%d, avgSpan=%f, startspan=%d, spantotal=%f \n", 
+						InitialLoadApp.SOURCE_TABLE_NAME_PRODUCTION_DETAIL, count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, (t2 - t0), avgSpan, (t2-loadBean.startTime), (loadBean.loadBeanSize*(t2 - t0)/(double)1000));
 				cnsl.flush();
-				//				logger.info(">>>>> insert into ProductionDetail count={}, sql={}, startSeq={}, endSeq={}", count, sql, loadBean.startSeq, loadBean.endSeq);
 			}
 
 
 		}  catch (Exception e) {
 			map.put("RETURN_CODE", "-999");
 			map.put("SQL", sql);
-			map.put("SINK_TABLE", loadBean.sinkTableName);
+			map.put("SINK_TABLE", InitialLoadApp.SOURCE_TABLE_NAME_PRODUCTION_DETAIL);
 			map.put("ERROR_MSG", e.getMessage());
 			map.put("STACK_TRACE", ExceptionUtils.getStackTrace(e));
 			logger.error("message={}, error map={}", e.getMessage(), map);
@@ -186,6 +196,6 @@ public class ProductionDetailBean {
 				}
 			}
 		}
-		return map;
+		return loadBean;
 	}
 }

@@ -29,4 +29,3 @@ mvn clean package
 cp ${COMMON_HOME}/target/*.jar "${APP_HOME}/lib"
 cp ${APP_HOME}/ods-consumer/target/*.jar "${APP_HOME}/lib"
 cp ${APP_HOME}/ods-load/target/*.jar "${APP_HOME}/lib"
-cp ${APP_HOME}/ods-test/target/*.jar "${APP_HOME}/lib"
