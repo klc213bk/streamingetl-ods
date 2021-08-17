@@ -14,8 +14,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.transglobe.streamingetl.ods.load.InitialLoadApp;
-import com.transglobe.streamingetl.ods.load.InitialLoadApp.LoadBean;
+import com.transglobe.streamingetl.ods.load.InitLoadApp;
 
 public class ProductionDetailBean {
 	private static final Logger logger = LoggerFactory.getLogger(ProductionDetailBean.class);
@@ -48,7 +47,7 @@ public class ProductionDetailBean {
 			sinkConn.setAutoCommit(false); 
 
 			pstmt = sinkConn.prepareStatement(
-					"insert into " + InitialLoadApp.SOURCE_TABLE_NAME_PRODUCTION_DETAIL
+					"insert into " + "SOURCE_TABLE_NAME_PRODUCTION_DETAIL"
 					+ " (DETAIL_ID,PRODUCTION_ID,POLICY_ID,ITEM_ID,PRODUCT_ID"
 					+ ",POLICY_YEAR,PRODUCTION_VALUE,EFFECTIVE_DATE,HIERARCHY_DATE,PRODUCER_ID"
 					+ ",PRODUCER_POSITION,BENEFIT_TYPE,FEE_TYPE,CHARGE_MODE,PREM_LIST_ID"
@@ -124,7 +123,7 @@ public class ProductionDetailBean {
 
 				pstmt.addBatch();
 
-				if (count % InitialLoadApp.BATCH_COMMIT_SIZE == 0) {
+				if (count % 1000 == 0) {
 					pstmt.executeBatch();//executing the batch  
 					sinkConn.commit(); 
 					pstmt.clearBatch();
@@ -141,7 +140,7 @@ public class ProductionDetailBean {
 				sinkConn.commit(); 
 				cnsl = System.console();
 				cnsl.printf("   >>>insert into %s count=%d, seq=%d, loadBeanSize=%d, startSeq=%d, endSeq=%d, span=%d, avgSpan=%f, startspan=%d, spantotal=%f \n", 
-						InitialLoadApp.SOURCE_TABLE_NAME_PRODUCTION_DETAIL, count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, (t2 - t0), avgSpan, (t2-loadBean.startTime), (loadBean.loadBeanSize*(t2 - t0)/(double)1000));
+						"SOURCE_TABLE_NAME_PRODUCTION_DETAIL", count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, (t2 - t0), avgSpan, (t2-loadBean.startTime), (loadBean.loadBeanSize*(t2 - t0)/(double)1000));
 				cnsl.flush();
 			}
 
@@ -149,7 +148,7 @@ public class ProductionDetailBean {
 		}  catch (Exception e) {
 			map.put("RETURN_CODE", "-999");
 			map.put("SQL", sql);
-			map.put("SINK_TABLE", InitialLoadApp.SOURCE_TABLE_NAME_PRODUCTION_DETAIL);
+			map.put("SINK_TABLE", "SOURCE_TABLE_NAME_PRODUCTION_DETAIL");
 			map.put("ERROR_MSG", e.getMessage());
 			map.put("STACK_TRACE", ExceptionUtils.getStackTrace(e));
 			logger.error("message={}, error map={}", e.getMessage(), map);

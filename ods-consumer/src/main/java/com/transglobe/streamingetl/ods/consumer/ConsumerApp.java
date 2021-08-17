@@ -62,18 +62,12 @@ public class ConsumerApp {
 		Cleanup cleanup = new Cleanup(config);
 		executor.submit(cleanup);
 		
-		SyncScn syncScn = new SyncScn(config);
-		executor.submit(syncScn);
-
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
 				for (ConsumerLoop2 consumer : consumers) {
 					consumer.shutdown();
 				} 
-				
-				cleanup.shutdown();
-				syncScn.shutdown();
 				
 				try {
 					if (sourceConnPool != null) sourceConnPool.close();

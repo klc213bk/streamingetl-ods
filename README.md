@@ -7,10 +7,12 @@
   	$./start-ignite.sh
   	
 3. Initial load data (Optional only for reload data)
-	$./start-initialload.sh  	
+	$./start-initload.sh  
 	
-4. start kafka consumer
+4.	$./start-load-PolicyPrintJob.sh	
+	
+5. start kafka consumer
  	$ ./start-consumer.sh
  	
-5. start logminer
+6. start logminer
 	$ ./start-logminer.sh 
