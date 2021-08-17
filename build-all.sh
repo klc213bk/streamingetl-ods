@@ -8,15 +8,15 @@ APP_HOME=/home/steven/gitrepo/transglobe/streamingetl-ods
 
 echo "start to build logminer"
 cd ${LOGMINER_HOME}
-#mvn clean package
+mvn clean package
 
 echo "start to build common"
 cd ${COMMON_HOME}
-#mvn clean install
+mvn clean install
 
 echo "start to build scheduling"
 cd ${SCHEDULING_HOME}
-#mvn clean package
+mvn clean package
 
 echo "start to build streamingetl"
 cp ${LOGMINER_HOME}/target/*.jar ${STREAMINGETL_HOME}/connectors/oracle-logminer-connector/

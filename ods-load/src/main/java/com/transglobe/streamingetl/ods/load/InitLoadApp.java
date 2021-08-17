@@ -69,7 +69,7 @@ public class InitLoadApp {
 
 	private Config config;
 
-	public InitLoadApp(String fileName, String dataDateStr) throws Exception {
+	public InitLoadApp(String fileName) throws Exception {
 		config = Config.getConfig(fileName);
 
 		sourceConnectionPool = new BasicDataSource();
@@ -115,13 +115,6 @@ public class InitLoadApp {
 	public static void main(String[] args) {
 		logger.info(">>> start run InitialLoadApp");
 
-		String dataDateStr = null; // yyyy-mm-dd
-		if (args.length != 0) {
-			dataDateStr = args[0];
-		}
-
-		Long t0 = System.currentTimeMillis();
-
 		String profileActive = System.getProperty("profile.active", "");
 		logger.info(">>>>>profileActive={}", profileActive);
 
@@ -132,7 +125,7 @@ public class InitLoadApp {
 		try {
 			String configFile = StringUtils.isBlank(profileActive)? CONFIG_FILE_NAME : profileActive + "/" + CONFIG_FILE_NAME;
 
-			app = new InitLoadApp(configFile, dataDateStr);
+			app = new InitLoadApp(configFile);
 
 			sinkConn = app.sinkConnectionPool.getConnection();
 			logminerConn = app.logminerConnectionPool.getConnection();
@@ -149,12 +142,6 @@ public class InitLoadApp {
 
 			logger.info(">>>  Start: createIndex:{}", SUPPL_LOG_SYNC_TABLE_INDEX_CREATE_FILE_NAME);	
 			OracleUtils.executeScriptFromFile(SUPPL_LOG_SYNC_TABLE_INDEX_CREATE_FILE_NAME, sinkConn);
-
-			logger.info(">>>  Start: deleteStreamingEtl:{}", STREAMING_ETL_NAME);	
-			StreamingEtlUtils.deleteStreamingEtl(logminerConn, STREAMING_ETL_NAME);
-						
-			logger.info(">>>  Start: insertStreamingEtl:{}", STREAMING_ETL_NAME);	
-			StreamingEtlUtils.insertStreamingEtl(logminerConn, STREAMING_ETL_NAME);
 
 			System.exit(0);
 

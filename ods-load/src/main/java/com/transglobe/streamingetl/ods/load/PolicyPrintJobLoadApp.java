@@ -11,6 +11,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.transglobe.streamingetl.common.util.StreamingEtlUtils;
 import com.transglobe.streamingetl.ods.load.bean.DataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TPolicyPrintJobDataLoader;
 
@@ -42,6 +43,15 @@ public class PolicyPrintJobLoadApp {
 
 			dataloader = new TPolicyPrintJobDataLoader(configFile, dataDateStr);
 			
+			logger.info(">>>  Start: delete StreamingEtl:{}", dataloader.getStreamingEtlName());	
+			dataloader.deleteStreamingEtl();
+						
+			logger.info(">>>  Start: insert StreamingEtl:{}", dataloader.getStreamingEtlName());	
+			dataloader.insertInitStreamingEtl();
+	
+			logger.info(">>>  Start to update STREAMING_ETL loading start");
+			dataloader.updateStreamingEtlLoadingStart();
+			
 			logger.info(">>>  Start to dropTable");
 			dataloader.dropSinkTable();
 			
@@ -67,8 +77,11 @@ public class PolicyPrintJobLoadApp {
 			logger.info(">>>  Start: createIndex");	
 			dataloader.createSinkTableIndex();
 			
-			logger.info(">>>  Start: insert 1st T_SUPPL_LOG_SYNC");
+			logger.info(">>>  Start: insert 1st SUPPL_LOG_SYNC");
 			dataloader.insertSupplLogSync();
+			
+			logger.info(">>>  Start to update STREAMING_ETL loading finish");
+			dataloader.updateStreamingEtlLoadingFinish();
 			
 		} catch (Exception e) {
 			logger.error("message={}, stack trace={}", e.getMessage(), ExceptionUtils.getStackTrace(e));
@@ -82,64 +95,5 @@ public class PolicyPrintJobLoadApp {
 		}
 	}
 	
-	private long deleteAndInsertLogminerScn() throws Exception {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql = "";
-		long currentScn = 0L;
-		try {
-			Class.forName(config.logminerDbDriver);
-			conn = DriverManager.getConnection(config.logminerDbUrl, config.logminerDbUsername, config.logminerDbPassword);
-			conn.setAutoCommit(false);
-
-			sql = "delete from " + config.logminerTableLogminerScn 
-					+ " where STREAMING_NAME=?";	
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, config.streamingName);
-			pstmt.executeUpdate();
-			pstmt.close();
-
-			sql = "select CURRENT_SCN from gv$database";
-			pstmt = conn.prepareStatement(sql);
-			rs = pstmt.executeQuery();
-			while (rs.next()) {
-				currentScn = rs.getLong("CURRENT_SCN");
-			}
-			rs.close();
-			pstmt.close();
-
-			long t = System.currentTimeMillis();
-			sql = "insert into " + config.logminerTableLogminerScn 
-					+ " (STREAMING_NAME,PREV_SCN,SCN,SCN_INSERT_TIME,SCN_UPDATE_TIME) "
-					+ " values (?,?,?,?,?)";
-
-			long prevScn = 0L;
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, config.streamingName);
-			pstmt.setLong(2, prevScn);
-			pstmt.setLong(3, currentScn);
-			pstmt.setTimestamp(4, new Timestamp(t));
-			pstmt.setTimestamp(5, new Timestamp(t));
-
-			pstmt.executeUpdate();
-
-			conn.commit();
-			pstmt.close();
-
-			logger.info("insert into {} with STREAMING_NAME={}, prevscn={}, scn={}", 
-					config.logminerTableLogminerScn, config.streamingName, prevScn, currentScn);
-
-		} catch (Exception e) {
-			conn.rollback();
-			throw e;
-		} finally {
-			if (rs != null) rs.close();
-			if (pstmt != null) pstmt.close();
-			if (conn != null) conn.close();
-
-		}
-		return currentScn;
-	}
-
+	
 }

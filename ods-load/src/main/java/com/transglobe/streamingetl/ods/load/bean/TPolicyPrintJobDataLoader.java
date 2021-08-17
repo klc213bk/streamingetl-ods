@@ -13,8 +13,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.transglobe.streamingetl.ods.load.InitLoadApp;
-
 public class TPolicyPrintJobDataLoader extends DataLoader {
 	private static final Logger logger = LoggerFactory.getLogger(TPolicyPrintJobDataLoader.class);
 	
@@ -22,6 +20,8 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 	
 	public static final int BATCH_COMMIT_SIZE = 1000;
 
+	public static final String STREAMING_ETL_NAME = "ODS-T_POLICY_PRINT_JOB";
+	
 	public static final String SOURCE_TABLE_NAME = "T_POLICY_PRINT_JOB";
 	
 	private static final String SINK_TABLE_NAME = "K_POLICY_PRINT_JOB";
@@ -130,7 +130,11 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 		
 		
 	}
-
+	
+	@Override
+	public String getStreamingEtlName() {
+		return STREAMING_ETL_NAME;
+	}
 	@Override
 	public String getSourceTableName() {
 		return SOURCE_TABLE_NAME;
@@ -164,6 +168,7 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 	LoadBean transferData(LoadBean loadBean, BasicDataSource sourceConnectionPool, BasicDataSource sinkConnectionPool,
 			BasicDataSource logminerConnectionPool, Date dataDate) {
 		Console cnsl = null;
+		long t0 = System.currentTimeMillis();
 		
 		try (
 				Connection sourceConn = sourceConnectionPool.getConnection();
@@ -175,14 +180,10 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 				final PreparedStatement minerPstmt = minerConn.prepareStatement("SELECT CURRENT_SCN FROM v$database")     
 				)
 		{
-			long t0 = System.currentTimeMillis();
-			
 			sinkConn.setAutoCommit(false); 
 
 			sourcePstmt.setLong(1, loadBean.startSeq);
 			sourcePstmt.setLong(2, loadBean.endSeq);
-
-//			Date tblUpdTime = new Date(System.currentTimeMillis());
 
 			Long currentScn = 0L;
 			try (final ResultSet rs =
