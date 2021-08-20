@@ -38,10 +38,10 @@ public class ConsumerApp {
 		String groupId = config.groupId;
 
 		sourceConnPool = new BasicDataSource();
-		sourceConnPool.setUrl(config.sourceDbUrl);
-		sourceConnPool.setUsername(config.sourceDbUsername);
-		sourceConnPool.setPassword(config.sourceDbPassword);
-		sourceConnPool.setDriverClassName(config.sourceDbDriver);
+//		sourceConnPool.setUrl(config.sourceDbUrl);
+//		sourceConnPool.setUsername(config.sourceDbUsername);
+//		sourceConnPool.setPassword(config.sourceDbPassword);
+//		sourceConnPool.setDriverClassName(config.sourceDbDriver);
 		sourceConnPool.setMaxTotal(3);
 
 		sinkConnPool = new BasicDataSource();

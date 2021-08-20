@@ -2,7 +2,7 @@
 
 APP_HOME=/home/steven/gitrepo/transglobe/streamingetl-ods
 
-java -cp "${APP_HOME}/lib/ods-load-1.0.jar:${APP_HOME}/lib/*" -Dprofile.active=env-dev com.transglobe.streamingetl.ods.load.PolicyPrintJobLoadApp $1
+java -cp "${APP_HOME}/lib/ods-load-1.0.jar:${APP_HOME}/lib/*" -Dprofile.active=env-dev com.transglobe.streamingetl.ods.load.TPolicyPrintJobLoadApp $1
 STATUS=$?	
 if [ ${STATUS} == 0 ]
 then

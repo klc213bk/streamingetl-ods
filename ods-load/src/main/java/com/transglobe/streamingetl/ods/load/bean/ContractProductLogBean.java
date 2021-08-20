@@ -14,7 +14,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.transglobe.streamingetl.ods.load.InitLoadApp;
 
 public class ContractProductLogBean {
 	private static final Logger logger = LoggerFactory.getLogger(ContractProductLogBean.class);
