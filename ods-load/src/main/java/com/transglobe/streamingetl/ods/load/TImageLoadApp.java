@@ -15,13 +15,13 @@ import com.transglobe.streamingetl.ods.load.bean.TPolicyPrintJobDataLoader;
  * @author oracle
  *
  */
-public class TPolicyPrintJobLoadApp {
-	private static final Logger logger = LoggerFactory.getLogger(TPolicyPrintJobLoadApp.class);
+public class TImageLoadApp {
+	private static final Logger logger = LoggerFactory.getLogger(TImageLoadApp.class);
 
 	private static final String CONFIG_FILE_NAME = "config.properties";
 
 	public static void main(String[] args) {
-		logger.info(">>> start run TPolicyPrintJobLoadApp");
+		logger.info(">>> start run TImageLoadApp");
 
 		String dataDateStr = null; // yyyy-mm-dd
 		if (args.length != 0) {
