@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -125,9 +126,8 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 				+ ",LANG_ID"
 				+ ",CHANGE_ID"
 				+ ",PRINT_COMP_INDI" 
-				+ ",ROWID"				// new column
 				+ " from " + this.sourceTableName
-				+ " a where ? <= a.JOB_ID and a.JOB_ID < ? for update";
+				+ " a where ? <= a.JOB_ID and a.JOB_ID < ?";
 	}
 
 	@Override
@@ -171,16 +171,15 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 				+ ",PRINT_COMP_INDI "                        
 				+ ",DATA_DATE       "		// ods add column 	        
 				+ ",TBL_UPD_TIME  "			// ods add column
-				+ ",SRC_ROWID"				// new column
-				+ ",INSERT_CURRENT_SCN)"	// new column
-				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE"
-				+ ",?,?)";
+				+ ",TBL_UPD_SCN)"	// new column
+				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
+				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?)";
 			
 	}
 
 	@Override
 	public LoadBean transferData(LoadBean loadBean, BasicDataSource sourceConnectionPool, BasicDataSource sinkConnectionPool,
-			BasicDataSource logminerConnectionPool, Date dataDate) {
+			BasicDataSource logminerConnectionPool) throws Exception {
 		Console cnsl = null;
 		
 		try (
@@ -194,6 +193,7 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 				)
 		{
 			long t0 = System.currentTimeMillis();
+			sourceConn.setAutoCommit(false);
 			sinkConn.setAutoCommit(false); 
 
 			sourcePstmt.setLong(1, loadBean.startSeq);
@@ -342,9 +342,7 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 					
 					// db current_time for tbl_upd_time 
 					
-					sinkPstmt.setString(38, rs.getString("ROWID")); // new column
-					
-					sinkPstmt.setLong(39, currentScn);				// new column
+					sinkPstmt.setLong(38, currentScn);				// new column
 
 					sinkPstmt.addBatch();
 
@@ -371,11 +369,10 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 				}
 			} catch (Exception e) {
 				sinkConn.rollback();
-				logger.error("error message={},stack trace={}", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e) );
+				throw e;
 			}
-		} catch (Exception e) {
-			logger.error("error message={},stack trace={}", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e) );
-		}
+			
+		} 
 		return loadBean;
 	}
 	
