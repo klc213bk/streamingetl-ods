@@ -11,6 +11,7 @@ public class Config {
 	public String sourceDbUsername;
 	public String sourceDbPassword;
 	
+	public String sourceTableSchema;
 	public String sourceTableTCommisionFee;
 	public String sourceTableTContractExtendCx;
 	public String sourceTableTContractExtendLog;
@@ -27,6 +28,7 @@ public class Config {
 	public String sinkDbUsername;
 	public String sinkDbPassword;
 	
+	public String sinkTableSchema;
 	public String sinkTableTCommisionFee;
 	public String sinkTableTContractExtendCx;
 	public String sinkTableTContractExtendLog;
@@ -110,6 +112,7 @@ public class Config {
 			config.sinkDbUsername = prop.getProperty("sink.db.username");
 			config.sinkDbPassword = prop.getProperty("sink.db.password");
 		
+			config.sinkTableSchema = prop.getProperty("sink.table.schema");
 			config.sinkTableTCommisionFee = prop.getProperty("sink.table.t_commision_fee");
 			config.sinkTableTContractExtendCx = prop.getProperty("sink.table.t_contract_extend_cx");
 			config.sinkTableTContractExtendLog = prop.getProperty("sink.table.t_contract_extend_log");

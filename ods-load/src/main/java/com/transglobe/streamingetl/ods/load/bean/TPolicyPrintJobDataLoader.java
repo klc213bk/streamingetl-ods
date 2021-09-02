@@ -18,10 +18,6 @@ import org.slf4j.LoggerFactory;
 public class TPolicyPrintJobDataLoader extends DataLoader {
 	private static final Logger logger = LoggerFactory.getLogger(TPolicyPrintJobDataLoader.class);
 
-	protected static final int THREADS = 15;
-	
-	public static final int BATCH_COMMIT_SIZE = 1000;
-
 	private String sourceTableName ;
 	
 	private String sinkTableName;
@@ -34,7 +30,7 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 	
 	public TPolicyPrintJobDataLoader(Config config, Date dataDate) throws Exception {
 		
-		super(THREADS, BATCH_COMMIT_SIZE, config, dataDate);
+		super(config, dataDate);
 		
 		this.sourceTableName = config.sourceTableTPolicyPrintJob;
 		
@@ -188,8 +184,7 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 				Connection minerConn = logminerConnectionPool.getConnection();
 				final PreparedStatement sourcePstmt = sourceConn.prepareStatement(getSelectSql());
 				final PreparedStatement sinkPstmt = 
-						sinkConn.prepareStatement(getInsertSql());
-				final PreparedStatement minerPstmt = minerConn.prepareStatement("SELECT CURRENT_SCN FROM v$database")     
+						sinkConn.prepareStatement(getInsertSql());  
 				)
 		{
 			long t0 = System.currentTimeMillis();
@@ -198,19 +193,6 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 
 			sourcePstmt.setLong(1, loadBean.startSeq);
 			sourcePstmt.setLong(2, loadBean.endSeq);
-
-			Long currentScn = 0L;
-			try (final ResultSet rs =
-					minerPstmt.executeQuery())
-			{
-				while (rs.next())
-				{
-					currentScn = rs.getLong("CURRENT_SCN");
-					break;
-				}
-			} catch (Exception e) {
-				logger.error("error message={},stack trace={}", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e) );
-			}
 
 			try (final ResultSet rs =
 					sourcePstmt.executeQuery())
@@ -342,11 +324,11 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 					
 					// db current_time for tbl_upd_time 
 					
-					sinkPstmt.setLong(38, currentScn);				// new column
+					sinkPstmt.setLong(38, loadBean.currentScn);				// new column
 
 					sinkPstmt.addBatch();
 
-					if (count % BATCH_COMMIT_SIZE == 0) {
+					if (count % this.batchCommitSize == 0) {
 						sinkPstmt.executeBatch();//executing the batch  
 						sinkConn.commit(); 
 						sinkPstmt.clearBatch();
@@ -362,9 +344,9 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 					loadBean.count = count;
 					
 					cnsl = System.console();
-					long expectedCompleteTime = (Long)((loadBean.loadBeanSize * span / THREADS)/1000);
-					cnsl.printf("   >>>insert into %s count=%d, loadbeanseq=%d, loadBeanSize=%d, startSeq=%d, endSeq=%d, span=%d, expectedCompleteTime(sec)=%d\n", 
-							sinkTableName, loadBean.count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, span, expectedCompleteTime);
+					
+					cnsl.printf("   >>>insert into %s count=%d, loadbeanseq=%d, loadBeanSize=%d, startSeq=%d, endSeq=%d, span=%d\n", 
+							sinkTableName, loadBean.count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, span);
 					cnsl.flush();
 				}
 			} catch (Exception e) {

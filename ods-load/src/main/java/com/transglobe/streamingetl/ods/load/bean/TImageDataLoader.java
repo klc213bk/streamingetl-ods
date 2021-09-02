@@ -18,10 +18,6 @@ public class TImageDataLoader extends DataLoader {
 
 	private static final Logger logger = LoggerFactory.getLogger(TImageDataLoader.class);
 
-	protected static final int THREADS = 15;
-
-	public static final int BATCH_COMMIT_SIZE = 1000;
-
 	private String sourceTableName ;
 
 	private String sinkTableName;
@@ -34,7 +30,7 @@ public class TImageDataLoader extends DataLoader {
 
 	public TImageDataLoader(Config config, Date dataDate) throws Exception {
 
-		super(THREADS, BATCH_COMMIT_SIZE, config, dataDate);
+		super(config, dataDate);
 
 		this.sourceTableName = config.sourceTableTPolicyPrintJob;
 
@@ -395,7 +391,7 @@ Console cnsl = null;
 					
 					sinkPstmt.addBatch();
 
-					if (count % BATCH_COMMIT_SIZE == 0) {
+					if (count % this.batchCommitSize == 0) {
 						sinkPstmt.executeBatch();//executing the batch  
 						sinkConn.commit(); 
 						sinkPstmt.clearBatch();
@@ -411,9 +407,9 @@ Console cnsl = null;
 					loadBean.count = count;
 					
 					cnsl = System.console();
-					long expectedCompleteTime = (Long)((loadBean.loadBeanSize * span / THREADS)/1000);
-					cnsl.printf("   >>>insert into %s count=%d, loadbeanseq=%d, loadBeanSize=%d, startSeq=%d, endSeq=%d, span=%d, expectedCompleteTime(sec)=%d\n", 
-							sinkTableName, loadBean.count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, span, expectedCompleteTime);
+
+					cnsl.printf("   >>>insert into %s count=%d, loadbeanseq=%d, loadBeanSize=%d, startSeq=%d, endSeq=%d, span=%d\n", 
+							sinkTableName, loadBean.count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, span);
 					cnsl.flush();
 				}
 			} catch (Exception e) {

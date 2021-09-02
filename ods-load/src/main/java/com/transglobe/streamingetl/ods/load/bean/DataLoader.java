@@ -1,13 +1,16 @@
 package com.transglobe.streamingetl.ods.load.bean;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,17 +21,16 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.transglobe.streamingetl.common.bean.CommonConstants;
 import com.transglobe.streamingetl.common.util.OracleUtils;
 import com.transglobe.streamingetl.common.util.StreamingEtlUtils;
 
 public abstract class DataLoader {
 	private static final Logger logger = LoggerFactory.getLogger(DataLoader.class);
 
-	private static final String SINK_TABLE_SUPPL_LOG_SYNC = "SUPPL_LOG_SYNC";
-	
 	private static final long STEP_SIZE = 1000000;
 	private static final long SUB_STEP_SIZE = 10000;
-	
+
 	protected BasicDataSource sourceConnectionPool;
 	protected BasicDataSource sinkConnectionPool;
 	protected BasicDataSource logminerConnectionPool;
@@ -42,7 +44,12 @@ public abstract class DataLoader {
 	protected int batchCommitSize;
 	
 	public DataLoader() {}
-	
+
+	public DataLoader(
+			Config config
+			, Date dataDate) throws Exception {
+		this(15, 1000, config, dataDate);
+	}
 	public DataLoader(int threads
 			, int batchCommitSize
 			, Config config
@@ -86,22 +93,32 @@ public abstract class DataLoader {
 	public Connection getLogminerConnection() throws SQLException {
 		return logminerConnectionPool.getConnection();
 	}
-	public void run() throws Exception {
-		logger.info(">>>  Start to STREAMING_ETL loading start");
-		startStreamingEtlLoading();
-		
+	private void initLoad() throws Exception {
+
 		logger.info(">>>  Start to dropTable");
 		dropSinkTable();
-		
+
 		logger.info(">>>  Start to create sink Table");
-		createSinkTable();
-		
+		createSinkTable();	
+	}
+
+	public void run() throws Exception {
+
+		initLoad();
+
+		logger.info(">>>  Start to STREAMING_ETL loading start");
+		Map<String, Object> map = startStreamingEtlLoading();
+
 		logger.info(">>>  Start to load data");
 		Long t0 = System.currentTimeMillis();
-		loadData();
+
+		Long currentScn = (Long)map.get("CURRENT_SCN");
+		Timestamp currentScnTimestamp = (Timestamp)map.get("CURRENT_SCN_TIMESTAMP");
+
+		loadData(currentScn, currentScnTimestamp);
 		logger.info(">>>tableName={}, loaddataSpan={}", getSourceTableName(), (System.currentTimeMillis() - t0));
 
-		
+
 		logger.info(">>>  Start: check source and sink data count");
 		long sourceCnt = getSourceRecordsCount();
 		long sinkCnt = getSinkRecordsCount();
@@ -110,15 +127,12 @@ public abstract class DataLoader {
 		} else {
 			throw new Exception("sourceCnt("+ sourceCnt + ") does not equal to sinkCnt(" + sinkCnt + ")");
 		}
-		
-		logger.info(">>>  Start: createIndex");	
-		createSinkTableIndex();
-		
-		logger.info(">>>  Start: init SUPPL_LOG_SYNC");
-		initSupplLogSync();
-		
+
 		logger.info(">>>  Start to update STREAMING_ETL loading finish");
 		updateStreamingEtlLoadingFinish();
+
+		logger.info(">>>  Start: createIndex");	
+		createSinkTableIndex();
 	}
 	public void dropSinkTable() throws Exception {
 		String sinkTableName = getSinkTableName();
@@ -167,64 +181,28 @@ public abstract class DataLoader {
 		}
 	}
 
-	public void startStreamingEtlLoading() throws Exception {
+	public Map<String, Object> startStreamingEtlLoading() throws Exception {
 		Connection logminerConn = null;
 		try {
 			logminerConn = getLogminerConnection();
-			StreamingEtlUtils.startStreamingEtlLoading(logminerConn, getStreamingEtlName());
+			Map<String, Object> map = StreamingEtlUtils.startStreamingEtlLoading(logminerConn, getStreamingEtlName());
+			return map;
 		} finally {
 			if (logminerConn != null) logminerConn.close();
 		}
 	}
-	public void updateStreamingEtlLoadingFinish() throws Exception {
+	public Map<String, Object> updateStreamingEtlLoadingFinish() throws Exception {
 		Connection logminerConn = null;
 		try {
 			logminerConn = getLogminerConnection();
-			StreamingEtlUtils.updateStreamingEtlLoadingFinish(logminerConn, getStreamingEtlName());
+			Map<String, Object> map = StreamingEtlUtils.updateStreamingEtlLoadingFinishState(logminerConn, getStreamingEtlName(), CommonConstants.STREAMING_ETL_LOADING_STATE_FINISH_LOADING);
+			return map;
 		} finally {
 			if (logminerConn != null) logminerConn.close();
 		}
 	}
-	
-	public void initSupplLogSync() throws Exception {
-		Connection sinkConn = null;
-		Connection logminerConn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql = "";
-		try {
 
-			sinkConn = getSinkConnection();
-			logminerConn = getLogminerConnection();
-
-			long t = System.currentTimeMillis();
-			sql = "truncate table " + SINK_TABLE_SUPPL_LOG_SYNC;
-			pstmt = sinkConn.prepareStatement(sql);
-			pstmt.executeUpdate();
-			pstmt.close();
-			
-//			sql = "insert into " + SINK_TABLE_SUPPL_LOG_SYNC 
-//					+ " (RS_ID, SSN, SCN, SCN_TIMESTAMP, TABLE_NAME, INSERT_TIME) "
-//					+ " values (?,?,?,?,?,?)";
-//
-//			pstmt = sinkConn.prepareStatement(sql);
-//			pstmt.setString(1, "RS-ID");
-//			pstmt.setLong(2, 0L);
-//			pstmt.setLong(3, 0L);
-//			pstmt.setNull(4, Types.TIMESTAMP);
-//			pstmt.setString(5, getSourceTableName());
-//			pstmt.setLong(6, t);
-//
-//			pstmt.executeUpdate();
-
-		} finally {
-			if (rs != null) rs.close();
-			if (pstmt != null) pstmt.close();
-			if (sinkConn != null) sinkConn.close();
-			if (logminerConn != null) logminerConn.close();
-		}
-	}
-	public void loadData() throws Exception {
+	public void loadData(Long currentScn, Timestamp currentScnTimestamp) throws Exception {
 		String selectMinIdSql = getSelectMinIdSql();
 		String selectMaxIdSql = getSelectMaxIdSql();
 		String countSql = getCountSql();
@@ -271,6 +249,8 @@ public abstract class DataLoader {
 						loadBean.tableName = sourceTableName;
 						loadBean.startSeq = startIndex;
 						loadBean.endSeq = endIndex;
+						loadBean.currentScn= currentScn;
+						loadBean.currentScnTimestamp = currentScnTimestamp;
 
 						loadBeanList.add(loadBean);
 
@@ -282,6 +262,8 @@ public abstract class DataLoader {
 							loadBean.tableName = sourceTableName;
 							loadBean.startSeq = startIndex + j * subStepSize;
 							loadBean.endSeq = startIndex + (j + 1) * subStepSize;
+							loadBean.currentScn= currentScn;
+							loadBean.currentScnTimestamp = currentScnTimestamp;
 
 							loadBeanList.add(loadBean);
 
@@ -304,7 +286,7 @@ public abstract class DataLoader {
 				loadBean.loadBeanSize = loadBeanList.size();
 				loadBean.startTime = System.currentTimeMillis();
 			}
-			
+
 			t1 = System.currentTimeMillis();
 			logger.info("src table={}, minId={}, maxId={}, loadbean size={}, recordCount={}, beforeLoadSpan={}", sourceTableName, minId, maxId, loadBeanList.size(), recordCount, (t1-t0));
 
@@ -425,6 +407,24 @@ public abstract class DataLoader {
 		} catch (Exception e) {
 			logger.error("message={}, stack trace={}", e.getMessage(), ExceptionUtils.getStackTrace(e));
 		}
+	}
+	public void gatherTableStats(String schema, String tableName) throws SQLException {
+		Connection sinkConn = null;
+		CallableStatement cstmt = null;
+		try {
+			sinkConn = this.sinkConnectionPool.getConnection();
+
+			String sql = "begin \n SYS.DBMS_STATS.GATHER_TABLE_STATS(?,?); \nend;";
+
+			CallableStatement cstamt = sinkConn.prepareCall(sql);
+			cstamt.setString(1, schema);	
+			cstamt.setString(2, tableName);	
+			cstamt.execute();
+		} finally {
+			if (cstmt != null) cstmt.close();
+			if (sinkConn != null) sinkConn.close();
+		}
+
 	}
 	private Long getMinId(String minSql) throws SQLException {
 		Connection sourceConn = null;

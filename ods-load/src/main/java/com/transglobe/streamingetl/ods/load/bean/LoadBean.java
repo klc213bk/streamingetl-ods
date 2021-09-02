@@ -1,5 +1,7 @@
 package com.transglobe.streamingetl.ods.load.bean;
 
+import java.sql.Timestamp;
+
 public class LoadBean {
 	public int seq;
 	public int loadBeanSize;
@@ -9,4 +11,6 @@ public class LoadBean {
 	public long endSeq;
 	public long span;
 	public long count = 0L;
+	public Long currentScn;
+	public Timestamp currentScnTimestamp;
 }

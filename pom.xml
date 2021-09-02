@@ -69,7 +69,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.transglobe.streamingetl.common</groupId>
+			<groupId>com.transglobe.streamingetl</groupId>
 			<artifactId>streamingetl-common</artifactId>
 			<version>1.0</version>
 		</dependency>
