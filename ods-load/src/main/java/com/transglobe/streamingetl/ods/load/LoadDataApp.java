@@ -11,6 +11,7 @@ import com.transglobe.streamingetl.ods.load.bean.Config;
 import com.transglobe.streamingetl.ods.load.bean.DataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TImageDataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TPolicyPrintJobDataLoader;
+import com.transglobe.streamingetl.ods.load.bean.TProductionDetailDataLoader;
 
 /**
  * @author oracle
@@ -58,6 +59,13 @@ public class LoadDataApp {
 				// update statistics
 				logger.info(">>>>>gatherTableStats");
 				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKPolicyPrintJob);
+			} else if (StringUtils.equals(config.sourceTableTProductionDetail, tableName)) {
+				dataloader = new TProductionDetailDataLoader(config, dataDate);
+				dataloader.run();
+				
+				// update statistics
+				logger.info(">>>>>gatherTableStats");
+				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKProductionDetail);
 			} else {
 				throw new Exception("No table name match:" + tableName);
 			}

@@ -21,7 +21,7 @@ public class Config {
 	public String sourceTableTPolicyChange;
 	public String sourceTableTPolicyPrintJob;
 	public String sourceTableTProductCommision;
-	public String sourceTableTProductDetail;
+	public String sourceTableTProductionDetail;
 	
 	public String sinkDbDriver;
 	public String sinkDbUrl;
@@ -62,7 +62,6 @@ public class Config {
 	public String sinkTableIndexesFileKPolicyPrintJob;
 	public String sinkTableIndexesFileKProductCommision;
 	public String sinkTableIndexesFileKProductionDetail;
-	public String sinkTableIndexesFileSupplLogSync; 
 	
 	public String logminerDbDriver;
 	public String logminerDbUrl;
@@ -78,7 +77,7 @@ public class Config {
 	public String streamingEtlNameTPolicyChange;
 	public String streamingEtlNameTPolicyPrintJob;
 	public String streamingEtlNameTProductCommision;
-	public String streamingEtlNameTProductDetail;
+	public String streamingEtlNameTProductionDetail;
 	
 	public static Config getConfig(String fileName) throws Exception {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -104,7 +103,7 @@ public class Config {
 			config.sourceTableTPolicyChange = prop.getProperty("source.table.t_policy_change");
 			config.sourceTableTPolicyPrintJob = prop.getProperty("source.table.t_policy_print_job");
 			config.sourceTableTProductCommision = prop.getProperty("source.table.t_product_commision");
-			config.sourceTableTProductDetail = prop.getProperty("source.table.t_production_detail");
+			config.sourceTableTProductionDetail = prop.getProperty("source.table.t_production_detail");
 					
 			config.sinkDbDriver = prop.getProperty("sink.db.driver");
 			config.sinkDbUrl = prop.getProperty("sink.db.url");
@@ -133,8 +132,7 @@ public class Config {
 			config.sinkTableCreateFileKPolicyPrintJob = prop.getProperty("sink.table.create.file.k_policy_print_job");
 			config.sinkTableCreateFileKProductCommision = prop.getProperty("sink.table.create.file.k_product_commision");
 			config.sinkTableCreateFileKProductionDetail = prop.getProperty("sink.table.create.file.k_production_detail");
-			config.sinkTableCreateFileSupplLogSync = prop.getProperty("sink.table.create.file.suppl_log_sync");
-
+			
 			config.sinkTableIndexesFileKCommisionFee = prop.getProperty("sink.table.indexes.file.k_commision_fee");
 			config.sinkTableIndexesFileKContractExtendCx = prop.getProperty("sink.table.indexes.file.k_contract_extend_cx");
 			config.sinkTableIndexesFileKContractExtendLog = prop.getProperty("sink.table.indexes.file.k_contract_extend_log");
@@ -145,7 +143,6 @@ public class Config {
 			config.sinkTableIndexesFileKPolicyPrintJob = prop.getProperty("sink.table.indexes.file.k_policy_print_job");
 			config.sinkTableIndexesFileKProductCommision = prop.getProperty("sink.table.indexes.file.k_product_commision");
 			config.sinkTableIndexesFileKProductionDetail = prop.getProperty("sink.table.indexes.file.k_production_detail");
-			config.sinkTableIndexesFileSupplLogSync = prop.getProperty("sink.table.indexes.file.suppl_log_sync");
 			
 			config.logminerDbDriver = prop.getProperty("logminer.db.driver");
 			config.logminerDbUrl = prop.getProperty("logminer.db.url");
@@ -162,7 +159,7 @@ public class Config {
 			config.streamingEtlNameTPolicyChange = prop.getProperty("streaming.etl.name.t_policy_change");
 			config.streamingEtlNameTPolicyPrintJob = prop.getProperty("streaming.etl.name.t_policy_print_job");
 			config.streamingEtlNameTProductCommision = prop.getProperty("streaming.etl.name.t_product_commision");
-			config.streamingEtlNameTProductDetail = prop.getProperty("streaming.etl.name.t_production_detail");
+			config.streamingEtlNameTProductionDetail = prop.getProperty("streaming.etl.name.t_production_detail");
 				
 					
 			return config;

@@ -211,19 +211,6 @@ Console cnsl = null;
 			sourcePstmt.setLong(1, loadBean.startSeq);
 			sourcePstmt.setLong(2, loadBean.endSeq);
 
-			Long currentScn = 0L;
-			try (final ResultSet rs =
-					minerPstmt.executeQuery())
-			{
-				while (rs.next())
-				{
-					currentScn = rs.getLong("CURRENT_SCN");
-					break;
-				}
-			} catch (Exception e) {
-				logger.error("error message={},stack trace={}", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e) );
-			}
-
 			try (final ResultSet rs =
 					sourcePstmt.executeQuery())
 			{
@@ -386,7 +373,7 @@ Console cnsl = null;
 					
 					// db current_time for tbl_upd_time 
 					
-					sinkPstmt.setLong(45, currentScn); 				// new column
+					sinkPstmt.setLong(45, loadBean.currentScn);				// new column				// new column
 					
 					sinkPstmt.addBatch();
 

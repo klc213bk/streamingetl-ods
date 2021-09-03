@@ -229,8 +229,10 @@ public abstract class DataLoader {
 			ResultSet cntRs = null;
 			List<LoadBean> loadBeanList = new ArrayList<>();
 			long recordCount = 0L;
-			while (startIndex <= maxId) {
-				long endIndex = startIndex + stepSize;
+			long endIndex = 0L;
+//			while (startIndex <= maxId) {
+			do {
+				endIndex = startIndex + stepSize;
 				pstmt.setLong(1, startIndex);
 				pstmt.setLong(2, endIndex);
 				cntRs = pstmt.executeQuery();
@@ -275,7 +277,7 @@ public abstract class DataLoader {
 				logger.info("count src table={}, startIndex= {}, endIndex={}, cnt={}, loadbeans={}", sourceTableName, startIndex, endIndex, cnt, j);
 
 				startIndex = endIndex;
-			}
+			} while (endIndex <= maxId);
 
 			for (int k = 0; k < loadBeanList.size(); k++) {
 				LoadBean loadBean = loadBeanList.get(k);
@@ -443,13 +445,13 @@ public abstract class DataLoader {
 		}
 
 	}
-	private Long getMaxId(String minSql) throws SQLException {
+	private Long getMaxId(String maxSql) throws SQLException {
 		Connection sourceConn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
 			sourceConn = getSourceConnection();
-			pstmt = sourceConn.prepareStatement(minSql);
+			pstmt = sourceConn.prepareStatement(maxSql);
 			rs = pstmt.executeQuery();
 			Long maxId = null;
 			while (rs.next()) {
