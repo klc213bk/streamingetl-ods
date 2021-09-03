@@ -30,17 +30,17 @@ public class TImageDataLoader extends DataLoader {
 
 	public TImageDataLoader(Config config, Date dataDate) throws Exception {
 
-		super(config, dataDate);
+		super(DataLoader.DEFAULT_THREADS, DataLoader.DEFAULT_BATCH_COMMIT_SIZE, config, dataDate);
 
-		this.sourceTableName = config.sourceTableTPolicyPrintJob;
+		this.sourceTableName = config.sourceTableTImage;
 
-		this.sinkTableName = config.sinkTableTPolicyPrintJob;
+		this.sinkTableName = config.sinkTableKImage;
 
-		this.streamingEtlName = config.streamingEtlNameTPolicyPrintJob;
+		this.streamingEtlName = config.streamingEtlNameTImage;
 
-		this.sinkTableCreateFile = config.sinkTableCreateFileKPolicyPrintJob;
+		this.sinkTableCreateFile = config.sinkTableCreateFileKImage;
 
-		this.sinkTableIndexesFile = config.sinkTableIndexesFileKPolicyPrintJob;
+		this.sinkTableIndexesFile = config.sinkTableIndexesFileKImage;
 	}
 
 	@Override
@@ -137,7 +137,7 @@ public class TImageDataLoader extends DataLoader {
 	@Override
 	protected String getInsertSql() {
 		return "insert into " + this.sinkTableName
-				+ "IMAGE_ID"
+				+ " (IMAGE_ID"
 				+ ",POLICY_ID"
 				+ ",IMAGE_TYPE_ID"
 				+ ",SEQ_NUMBER"
@@ -182,7 +182,6 @@ public class TImageDataLoader extends DataLoader {
 				+ ",SCAN_ORDER"
 				+ ",DATA_DATE"				// ods add column
 				+ ",TBL_UPD_TIME"			// ods add column
-				+ ",SRC_ROWID" 				// new column
 				+ ",TBL_UPD_SCN)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"

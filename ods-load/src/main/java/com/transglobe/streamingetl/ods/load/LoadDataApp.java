@@ -45,19 +45,23 @@ public class LoadDataApp {
 			Date dataDate = Date.valueOf(dataDateStr);
 			if (StringUtils.equals(config.sourceTableTImage, tableName)) {
 				dataloader = new TImageDataLoader(config, dataDate);
+				dataloader.run();
+				
 				// update statistics
-				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableTImage);
+				logger.info(">>>>>gatherTableStats");
+				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKImage);
 				
 			} else if (StringUtils.equals(config.sourceTableTPolicyPrintJob, tableName)) {
 				dataloader = new TPolicyPrintJobDataLoader(config, dataDate);
+				dataloader.run();
+				
 				// update statistics
-				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableTPolicyPrintJob);
+				logger.info(">>>>>gatherTableStats");
+				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKPolicyPrintJob);
 			} else {
 				throw new Exception("No table name match:" + tableName);
 			}
-			
-			dataloader.run();
-			
+
 			System.exit(0);
 		} catch (Exception e) {
 			logger.error("message={}, stack trace={}", e.getMessage(), ExceptionUtils.getStackTrace(e));

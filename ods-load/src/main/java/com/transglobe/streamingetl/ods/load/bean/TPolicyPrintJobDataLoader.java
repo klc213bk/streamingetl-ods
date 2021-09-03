@@ -30,11 +30,11 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 	
 	public TPolicyPrintJobDataLoader(Config config, Date dataDate) throws Exception {
 		
-		super(config, dataDate);
+		super(DataLoader.DEFAULT_THREADS, DataLoader.DEFAULT_BATCH_COMMIT_SIZE, config, dataDate);
 		
 		this.sourceTableName = config.sourceTableTPolicyPrintJob;
 		
-		this.sinkTableName = config.sinkTableTPolicyPrintJob;
+		this.sinkTableName = config.sinkTableKPolicyPrintJob;
 		
 		this.streamingEtlName = config.streamingEtlNameTPolicyPrintJob;
 		
@@ -129,7 +129,7 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 	@Override
 	protected String getInsertSql() {
 		return "insert into " + this.sinkTableName
-				+ "(JOB_ID"                                  
+				+ " (JOB_ID"                                  
 				+ ",POLICY_ID"                             
 				+ ",PAYCARD_INDI "                           
 				+ ",LETTER_INDI   "                          

@@ -30,6 +30,9 @@ public abstract class DataLoader {
 
 	private static final long STEP_SIZE = 1000000;
 	private static final long SUB_STEP_SIZE = 10000;
+	
+	public static final int DEFAULT_THREADS = 15;
+	public static final int DEFAULT_BATCH_COMMIT_SIZE = 1000;
 
 	protected BasicDataSource sourceConnectionPool;
 	protected BasicDataSource sinkConnectionPool;
@@ -44,12 +47,6 @@ public abstract class DataLoader {
 	protected int batchCommitSize;
 	
 	public DataLoader() {}
-
-	public DataLoader(
-			Config config
-			, Date dataDate) throws Exception {
-		this(15, 1000, config, dataDate);
-	}
 	public DataLoader(int threads
 			, int batchCommitSize
 			, Config config

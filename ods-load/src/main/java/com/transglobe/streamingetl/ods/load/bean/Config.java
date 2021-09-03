@@ -29,17 +29,16 @@ public class Config {
 	public String sinkDbPassword;
 	
 	public String sinkTableSchema;
-	public String sinkTableTCommisionFee;
-	public String sinkTableTContractExtendCx;
-	public String sinkTableTContractExtendLog;
-	public String sinkTableTContractProductLog;
-	public String sinkTableTImage;
-	public String sinkTableJbpmVariableinstance;
-	public String sinkTableTPolicyChange;
-	public String sinkTableTPolicyPrintJob;
-	public String sinkTableTProductCommision;
-	public String sinkTableTProductDetail;
-	public String sinkTableSupplLogSync;
+	public String sinkTableKCommisionFee;
+	public String sinkTableKContractExtendCx;
+	public String sinkTableKContractExtendLog;
+	public String sinkTableKContractProductLog;
+	public String sinkTableKImage;
+	public String sinkTableKJbpmVariableinstance;
+	public String sinkTableKPolicyChange;
+	public String sinkTableKPolicyPrintJob;
+	public String sinkTableKProductCommision;
+	public String sinkTableKProductionDetail;
 	
 	public String sinkTableCreateFileKCommisionFee;
 	public String sinkTableCreateFileKContractExtendCx;
@@ -100,7 +99,7 @@ public class Config {
 			config.sourceTableTContractExtendCx = prop.getProperty("source.table.t_contract_extend_cx");
 			config.sourceTableTContractExtendLog = prop.getProperty("source.table.t_contract_extend_log");
 			config.sourceTableTContractProductLog = prop.getProperty("source.table.t_c_ontract_product_log");
-			config.sourceTableTImage = prop.getProperty("source.table.t_image=T_IMAGE");
+			config.sourceTableTImage = prop.getProperty("source.table.t_image");
 			config.sourceTableJbpmVariableinstance = prop.getProperty("source.table.jbpm_variableinstance");
 			config.sourceTableTPolicyChange = prop.getProperty("source.table.t_policy_change");
 			config.sourceTableTPolicyPrintJob = prop.getProperty("source.table.t_policy_print_job");
@@ -113,17 +112,16 @@ public class Config {
 			config.sinkDbPassword = prop.getProperty("sink.db.password");
 		
 			config.sinkTableSchema = prop.getProperty("sink.table.schema");
-			config.sinkTableTCommisionFee = prop.getProperty("sink.table.t_commision_fee");
-			config.sinkTableTContractExtendCx = prop.getProperty("sink.table.t_contract_extend_cx");
-			config.sinkTableTContractExtendLog = prop.getProperty("sink.table.t_contract_extend_log");
-			config.sinkTableTContractProductLog = prop.getProperty("sink.table.t_contract_product_log");
-			config.sinkTableTImage = prop.getProperty("sink.table.t_image=K_IMAGE");
-			config.sinkTableJbpmVariableinstance = prop.getProperty("sink.table.jbpm_variableinstance");
-			config.sinkTableTPolicyChange = prop.getProperty("sink.table.t_policy_change");
-			config.sinkTableTPolicyPrintJob = prop.getProperty("sink.table.t_policy_print_job");
-			config.sinkTableTProductCommision = prop.getProperty("sink.table.t_product_commision");
-			config.sinkTableTProductDetail = prop.getProperty("sink.table.t_production_detail");
-			config.sinkTableSupplLogSync = prop.getProperty("sink.table.suppl_log_sync");
+			config.sinkTableKCommisionFee = prop.getProperty("sink.table.k_commision_fee");
+			config.sinkTableKContractExtendCx = prop.getProperty("sink.table.k_contract_extend_cx");
+			config.sinkTableKContractExtendLog = prop.getProperty("sink.table.k_contract_extend_log");
+			config.sinkTableKContractProductLog = prop.getProperty("sink.table.k_contract_product_log");
+			config.sinkTableKImage = prop.getProperty("sink.table.k_image");
+			config.sinkTableKJbpmVariableinstance = prop.getProperty("sink.table.k_jbpm_variableinstance");
+			config.sinkTableKPolicyChange = prop.getProperty("sink.table.k_policy_change");
+			config.sinkTableKPolicyPrintJob = prop.getProperty("sink.table.k_policy_print_job");
+			config.sinkTableKProductCommision = prop.getProperty("sink.table.k_product_commision");
+			config.sinkTableKProductionDetail = prop.getProperty("sink.table.k_production_detail");
 			
 			config.sinkTableCreateFileKCommisionFee = prop.getProperty("sink.table.create.file.k_commision_fee");
 			config.sinkTableCreateFileKContractExtendCx  = prop.getProperty("sink.table.create.file.k_contract_extend_cx");
