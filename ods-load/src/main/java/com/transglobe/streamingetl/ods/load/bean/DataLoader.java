@@ -29,11 +29,11 @@ public abstract class DataLoader {
 	private static final Logger logger = LoggerFactory.getLogger(DataLoader.class);
 
 	private static final long STEP_SIZE = 1000000;
-	//private static final long SUB_STEP_SIZE = 10000;
+	private static final long SUB_STEP_SIZE = 10000;
+	private static final int RUN_SIZE = 10000;	// adjust this number if out of memory
 	
 	public static final int DEFAULT_THREADS = 15;
 	public static final int DEFAULT_BATCH_COMMIT_SIZE = 1000;
-	public static final long DEFAULT_SUB_STEP_SIZE = 10000;
 	
 	protected BasicDataSource sourceConnectionPool;
 	protected BasicDataSource sinkConnectionPool;
@@ -49,28 +49,20 @@ public abstract class DataLoader {
 	
 	private long subStepSize;
 	
+	private int runSize;
+	
 	public DataLoader() {}
+
 	public DataLoader(
 			int threads
 			, int batchCommitSize
 			, Config config
 			, Date dataDate) throws Exception {
-		this(DEFAULT_SUB_STEP_SIZE
-				, threads
-				, batchCommitSize
-				, config
-				, dataDate);
-	}
-	public DataLoader(
-			long subStepSize
-			, int threads
-			, int batchCommitSize
-			, Config config
-			, Date dataDate) throws Exception {
-		this.subStepSize = subStepSize;
 		this.threads = threads;
 		this.batchCommitSize = batchCommitSize;
 
+		this.subStepSize = SUB_STEP_SIZE;
+		this.runSize = RUN_SIZE;
 		this.config = config;
 
 		sourceConnectionPool = new BasicDataSource();
@@ -306,7 +298,6 @@ public abstract class DataLoader {
 			
 			int runStartIndex = 0;
 			int runEndIndex = 0;
-			int runSize = 100;
 			while (runEndIndex < loadBeanList.size()) {
 				runEndIndex = runStartIndex + runSize;
 				if (runEndIndex >= loadBeanList.size()) {
