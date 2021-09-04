@@ -155,7 +155,7 @@ public class TProductionDetailDataLoader extends DataLoader {
 				+ ",PRODUCER_POSITION"
 				+ ",BENEFIT_TYPE"
 				+ ",FEE_TYPE"
-				+ ",CHARGE_MOE"
+				+ ",CHARGE_MODE"
 				+ ",PREM_LIST_ID"
 				+ ",COMM_ITEM_ID"
 				+ ",POLICY_CHG_ID"
@@ -198,7 +198,7 @@ public class TProductionDetailDataLoader extends DataLoader {
 	}
 
 	@Override
-	protected LoadBean transferData(LoadBean loadBean, BasicDataSource sourceConnectionPool,
+	protected void transferData(LoadBean loadBean, BasicDataSource sourceConnectionPool,
 			BasicDataSource sinkConnectionPool, BasicDataSource logminerConnectionPool) throws Exception {
 Console cnsl = null;
 		
@@ -313,7 +313,6 @@ Console cnsl = null;
 			}
 			
 		} 
-		return loadBean;
 	}	
 
 }

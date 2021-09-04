@@ -190,7 +190,7 @@ public class TImageDataLoader extends DataLoader {
 	}
 
 	@Override
-	protected LoadBean transferData(LoadBean loadBean, BasicDataSource sourceConnectionPool,
+	protected void transferData(LoadBean loadBean, BasicDataSource sourceConnectionPool,
 			BasicDataSource sinkConnectionPool, BasicDataSource logminerConnectionPool) throws Exception {
 Console cnsl = null;
 		
@@ -404,7 +404,6 @@ Console cnsl = null;
 			}
 			
 		} 
-		return loadBean;
 	}	
 
 }

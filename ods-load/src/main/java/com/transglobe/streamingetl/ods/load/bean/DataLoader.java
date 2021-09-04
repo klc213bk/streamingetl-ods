@@ -29,11 +29,12 @@ public abstract class DataLoader {
 	private static final Logger logger = LoggerFactory.getLogger(DataLoader.class);
 
 	private static final long STEP_SIZE = 1000000;
-	private static final long SUB_STEP_SIZE = 10000;
+	//private static final long SUB_STEP_SIZE = 10000;
 	
 	public static final int DEFAULT_THREADS = 15;
 	public static final int DEFAULT_BATCH_COMMIT_SIZE = 1000;
-
+	public static final long DEFAULT_SUB_STEP_SIZE = 10000;
+	
 	protected BasicDataSource sourceConnectionPool;
 	protected BasicDataSource sinkConnectionPool;
 	protected BasicDataSource logminerConnectionPool;
@@ -46,11 +47,27 @@ public abstract class DataLoader {
 
 	protected int batchCommitSize;
 	
+	private long subStepSize;
+	
 	public DataLoader() {}
-	public DataLoader(int threads
+	public DataLoader(
+			int threads
 			, int batchCommitSize
 			, Config config
 			, Date dataDate) throws Exception {
+		this(DEFAULT_SUB_STEP_SIZE
+				, threads
+				, batchCommitSize
+				, config
+				, dataDate);
+	}
+	public DataLoader(
+			long subStepSize
+			, int threads
+			, int batchCommitSize
+			, Config config
+			, Date dataDate) throws Exception {
+		this.subStepSize = subStepSize;
 		this.threads = threads;
 		this.batchCommitSize = batchCommitSize;
 
@@ -221,7 +238,6 @@ public abstract class DataLoader {
 			executor = Executors.newFixedThreadPool(threads);
 
 			long stepSize = STEP_SIZE;
-			long subStepSize = SUB_STEP_SIZE;
 			long startIndex = minId;
 
 			sourceConn=  getSourceConnection();
@@ -244,13 +260,10 @@ public abstract class DataLoader {
 				int j = 0;
 				if (cnt > 0) {
 					if (cnt <= batchCommitSize) {
-						LoadBean loadBean = new LoadBean();
-						loadBean.tableName = sourceTableName;
+						LoadBean loadBean = new LoadBean();			
 						loadBean.startSeq = startIndex;
 						loadBean.endSeq = endIndex;
-						loadBean.currentScn= currentScn;
-						loadBean.currentScnTimestamp = currentScnTimestamp;
-
+						
 						loadBeanList.add(loadBean);
 
 						j++;
@@ -258,12 +271,9 @@ public abstract class DataLoader {
 
 						while (true) {
 							LoadBean loadBean = new LoadBean();
-							loadBean.tableName = sourceTableName;
 							loadBean.startSeq = startIndex + j * subStepSize;
 							loadBean.endSeq = startIndex + (j + 1) * subStepSize;
-							loadBean.currentScn= currentScn;
-							loadBean.currentScnTimestamp = currentScnTimestamp;
-
+							
 							loadBeanList.add(loadBean);
 
 							j++;
@@ -282,29 +292,62 @@ public abstract class DataLoader {
 			for (int k = 0; k < loadBeanList.size(); k++) {
 				LoadBean loadBean = loadBeanList.get(k);
 				loadBean.seq = (k+1);
+				loadBean.tableName = sourceTableName;
 				loadBean.loadBeanSize = loadBeanList.size();
 				loadBean.startTime = System.currentTimeMillis();
+				loadBean.currentScn= currentScn;
+				loadBean.currentScnTimestamp = currentScnTimestamp;
 			}
 
 			t1 = System.currentTimeMillis();
 			logger.info("src table={}, minId={}, maxId={}, loadbean size={}, recordCount={}, beforeLoadSpan={}", sourceTableName, minId, maxId, loadBeanList.size(), recordCount, (t1-t0));
 
-			List<CompletableFuture<LoadBean>> futures = 
-					loadBeanList.stream().map(t -> CompletableFuture.supplyAsync(() -> 
-					{
-						LoadBean loadBean = null;
-						try {
-							loadBean = loadData(t);
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							logger.info("error message={}, trace={}", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e));
-						}
-						return loadBean;
-					}))
-					.collect(Collectors.toList());
+			List<LoadBean> runList = null;
+			
+			int runStartIndex = 0;
+			int runEndIndex = 0;
+			int runSize = 100;
+			while (runEndIndex < loadBeanList.size()) {
+				runEndIndex = runStartIndex + runSize;
+				if (runEndIndex >= loadBeanList.size()) {
+					runEndIndex = loadBeanList.size();
+				}  
+				logger.info(">>> runStartIndex={}, runEndIndex={}", runStartIndex, runEndIndex);
+				runList = loadBeanList.subList(runStartIndex, runEndIndex);
+				List<CompletableFuture<LoadBean>> futures = 
+						runList.stream().map(t -> CompletableFuture.supplyAsync(() -> 
+						{
+							try {
+								loadData(t);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								logger.info("error message={}, trace={}", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e));
+							}
+							return t;
+						}))
+						.collect(Collectors.toList());
+				
+				List<LoadBean> result = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
+
+				runStartIndex = runEndIndex;
+			}
+			
+		
+//			List<CompletableFuture<LoadBean>> futures = 
+//					loadBeanList.stream().map(t -> CompletableFuture.supplyAsync(() -> 
+//					{
+//						try {
+//							loadData(t);
+//						} catch (Exception e) {
+//							// TODO Auto-generated catch block
+//							logger.info("error message={}, trace={}", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e));
+//						}
+//						return t;
+//					}))
+//					.collect(Collectors.toList());
 
 
-			List<LoadBean> result = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
+//			List<LoadBean> result = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
 
 			//			double totalSpan = 0;
 			//			long totalCount = 0L;
@@ -384,11 +427,10 @@ public abstract class DataLoader {
 			if (sinkConn != null) sinkConn.close();
 		}
 	}
-	private LoadBean loadData(LoadBean loadBean) throws Exception {
+	private void loadData(LoadBean loadBean) throws Exception {
 
 		transferData(loadBean, sourceConnectionPool, sinkConnectionPool, logminerConnectionPool);
 
-		return loadBean;
 	}
 	public void close() {
 		try {
@@ -476,7 +518,7 @@ public abstract class DataLoader {
 	abstract protected String getCountSql();
 	abstract protected String getSelectSql();
 	abstract protected String getInsertSql();
-	abstract protected LoadBean transferData(LoadBean loadBean, 
+	abstract protected void transferData(LoadBean loadBean, 
 			BasicDataSource sourceConnectionPool
 			, BasicDataSource sinkConnectionPool
 			, BasicDataSource logminerConnectionPool) throws Exception;

@@ -174,7 +174,7 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 	}
 
 	@Override
-	public LoadBean transferData(LoadBean loadBean, BasicDataSource sourceConnectionPool, BasicDataSource sinkConnectionPool,
+	public void transferData(LoadBean loadBean, BasicDataSource sourceConnectionPool, BasicDataSource sinkConnectionPool,
 			BasicDataSource logminerConnectionPool) throws Exception {
 		Console cnsl = null;
 		
@@ -355,7 +355,6 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 			}
 			
 		} 
-		return loadBean;
 	}
 	
 	
