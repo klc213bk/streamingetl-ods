@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import com.transglobe.streamingetl.ods.load.bean.Config;
 import com.transglobe.streamingetl.ods.load.bean.DataLoader;
+import com.transglobe.streamingetl.ods.load.bean.TCommisionFeeDataLoader;
+import com.transglobe.streamingetl.ods.load.bean.TContractExtendCxDataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TImageDataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TPolicyPrintJobDataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TProductionDetailDataLoader;
@@ -44,7 +46,15 @@ public class LoadDataApp {
 			String configFile = StringUtils.isBlank(profileActive)? CONFIG_FILE_NAME : profileActive + "/" + CONFIG_FILE_NAME;
 			Config config = Config.getConfig(configFile);
 			Date dataDate = Date.valueOf(dataDateStr);
-			if (StringUtils.equals(config.sourceTableTImage, tableName)) {
+			if (StringUtils.equals(config.sourceTableTCommisionFee, tableName)) {
+				dataloader = new TCommisionFeeDataLoader(config, dataDate);
+				dataloader.run();
+				
+			} else if (StringUtils.equals(config.sourceTableTContractExtendCx, tableName)) {
+				dataloader = new TContractExtendCxDataLoader(config, dataDate);
+				dataloader.run();
+				
+			} else if (StringUtils.equals(config.sourceTableTImage, tableName)) {
 				dataloader = new TImageDataLoader(config, dataDate);
 				dataloader.run();
 				
