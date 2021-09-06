@@ -45,7 +45,7 @@ public class Config {
 	public String sinkTableCreateFileKContractExtendLog;
 	public String sinkTableCreateFileKContractProductLog;
 	public String sinkTableCreateFileKImage;
-	public String sinkTableCreateFileJbpmVariableinstance;
+	public String sinkTableCreateFileKJbpmVariableinstance;
 	public String sinkTableCreateFileKPolicyChange;
 	public String sinkTableCreateFileKPolicyPrintJob;
 	public String sinkTableCreateFileKProductCommision;
@@ -57,7 +57,7 @@ public class Config {
 	public String sinkTableIndexesFileKContractExtendLog;
 	public String sinkTableIndexesFileKContractProductLog;
 	public String sinkTableIndexesFileKImage;
-	public String sinkTableIndexesFileJbpmVariableinstance;
+	public String sinkTableIndexesFileKJbpmVariableinstance;
 	public String sinkTableIndexesFileKPolicyChange;
 	public String sinkTableIndexesFileKPolicyPrintJob;
 	public String sinkTableIndexesFileKProductCommision;
@@ -127,7 +127,7 @@ public class Config {
 			config.sinkTableCreateFileKContractExtendLog = prop.getProperty("sink.table.create.file.k_contract_extend_log");
 			config.sinkTableCreateFileKContractProductLog = prop.getProperty("sink.table.create.file.k_contract_product_log");
 			config.sinkTableCreateFileKImage = prop.getProperty("sink.table.create.file.k_image");
-			config.sinkTableCreateFileJbpmVariableinstance = prop.getProperty("sink.table.create.file.k_jbpm_variableinstance");
+			config.sinkTableCreateFileKJbpmVariableinstance = prop.getProperty("sink.table.create.file.k_jbpm_variableinstance");
 			config.sinkTableCreateFileKPolicyChange = prop.getProperty("sink.table.create.file.k_policy_change");
 			config.sinkTableCreateFileKPolicyPrintJob = prop.getProperty("sink.table.create.file.k_policy_print_job");
 			config.sinkTableCreateFileKProductCommision = prop.getProperty("sink.table.create.file.k_product_commision");
@@ -138,7 +138,7 @@ public class Config {
 			config.sinkTableIndexesFileKContractExtendLog = prop.getProperty("sink.table.indexes.file.k_contract_extend_log");
 			config.sinkTableIndexesFileKContractProductLog = prop.getProperty("sink.table.indexes.file.k_contract_product_log");
 			config.sinkTableIndexesFileKImage = prop.getProperty("sink.table.indexes.file.k_image");
-			config.sinkTableIndexesFileJbpmVariableinstance = prop.getProperty("sink.table.indexes.file.k_jbpm_variableinstance");
+			config.sinkTableIndexesFileKJbpmVariableinstance = prop.getProperty("sink.table.indexes.file.k_jbpm_variableinstance");
 			config.sinkTableIndexesFileKPolicyChange = prop.getProperty("sink.table.indexes.file.k_policy_change");
 			config.sinkTableIndexesFileKPolicyPrintJob = prop.getProperty("sink.table.indexes.file.k_policy_print_job");
 			config.sinkTableIndexesFileKProductCommision = prop.getProperty("sink.table.indexes.file.k_product_commision");

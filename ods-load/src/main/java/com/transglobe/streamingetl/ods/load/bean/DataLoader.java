@@ -30,7 +30,7 @@ public abstract class DataLoader {
 
 	private static final long STEP_SIZE = 1000000;
 	private static final long SUB_STEP_SIZE = 10000;
-	private static final int RUN_SIZE = 10000;	// adjust this number if out of memory
+	private static final int RUN_BATCH_SIZE = 10000;	// adjust this number if out of memory
 	
 	public static final int DEFAULT_THREADS = 15;
 	public static final int DEFAULT_BATCH_COMMIT_SIZE = 1000;
@@ -49,7 +49,7 @@ public abstract class DataLoader {
 	
 	private long subStepSize;
 	
-	private int runSize;
+	private int runBatchSize;
 	
 	public DataLoader() {}
 
@@ -62,7 +62,7 @@ public abstract class DataLoader {
 		this.batchCommitSize = batchCommitSize;
 
 		this.subStepSize = SUB_STEP_SIZE;
-		this.runSize = RUN_SIZE;
+		this.runBatchSize = RUN_BATCH_SIZE;
 		this.config = config;
 
 		sourceConnectionPool = new BasicDataSource();
@@ -299,7 +299,7 @@ public abstract class DataLoader {
 			int runStartIndex = 0;
 			int runEndIndex = 0;
 			while (runEndIndex < loadBeanList.size()) {
-				runEndIndex = runStartIndex + runSize;
+				runEndIndex = runStartIndex + runBatchSize;
 				if (runEndIndex >= loadBeanList.size()) {
 					runEndIndex = loadBeanList.size();
 				}  

@@ -11,8 +11,12 @@ import com.transglobe.streamingetl.ods.load.bean.Config;
 import com.transglobe.streamingetl.ods.load.bean.DataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TCommisionFeeDataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TContractExtendCxDataLoader;
+import com.transglobe.streamingetl.ods.load.bean.TContractExtendLogDataLoader;
+import com.transglobe.streamingetl.ods.load.bean.TContractProductLogDataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TImageDataLoader;
+import com.transglobe.streamingetl.ods.load.bean.TPolicyChangeDataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TPolicyPrintJobDataLoader;
+import com.transglobe.streamingetl.ods.load.bean.TProductCommisionDataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TProductionDetailDataLoader;
 
 /**
@@ -54,6 +58,22 @@ public class LoadDataApp {
 				dataloader = new TContractExtendCxDataLoader(config, dataDate);
 				dataloader.run();
 				
+			} else if (StringUtils.equals(config.sourceTableTContractExtendLog, tableName)) {
+				dataloader = new TContractExtendLogDataLoader(config, dataDate);
+				dataloader.run();
+				
+				// update statistics
+				logger.info(">>>>>gatherTableStats");
+				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKContractExtendLog);
+				
+			}  else if (StringUtils.equals(config.sourceTableTContractProductLog, tableName)) {
+				dataloader = new TContractProductLogDataLoader(config, dataDate);
+				dataloader.run();
+				
+				// update statistics
+				logger.info(">>>>>gatherTableStats");
+				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKContractProductLog);
+				
 			} else if (StringUtils.equals(config.sourceTableTImage, tableName)) {
 				dataloader = new TImageDataLoader(config, dataDate);
 				dataloader.run();
@@ -62,6 +82,18 @@ public class LoadDataApp {
 				logger.info(">>>>>gatherTableStats");
 				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKImage);
 				
+			} else if (StringUtils.equals(config.sourceTableJbpmVariableinstance, tableName)) {
+				dataloader = new TImageDataLoader(config, dataDate);
+				dataloader.run();
+				
+				// update statistics
+				logger.info(">>>>>gatherTableStats");
+				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKJbpmVariableinstance);
+				
+			} else if (StringUtils.equals(config.sourceTableTPolicyChange, tableName)) {
+				dataloader = new TPolicyChangeDataLoader(config, dataDate);
+				dataloader.run();
+				
 			} else if (StringUtils.equals(config.sourceTableTPolicyPrintJob, tableName)) {
 				dataloader = new TPolicyPrintJobDataLoader(config, dataDate);
 				dataloader.run();
@@ -69,6 +101,10 @@ public class LoadDataApp {
 				// update statistics
 				logger.info(">>>>>gatherTableStats");
 				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKPolicyPrintJob);
+			} else if (StringUtils.equals(config.sourceTableTProductCommision, tableName)) {
+				dataloader = new TProductCommisionDataLoader(config, dataDate);
+				dataloader.run();
+				
 			} else if (StringUtils.equals(config.sourceTableTProductionDetail, tableName)) {
 				dataloader = new TProductionDetailDataLoader(config, dataDate);
 				dataloader.run();
