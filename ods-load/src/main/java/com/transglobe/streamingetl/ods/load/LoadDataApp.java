@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.transglobe.streamingetl.ods.load.bean.Config;
 import com.transglobe.streamingetl.ods.load.bean.DataLoader;
+import com.transglobe.streamingetl.ods.load.bean.JbpmVariableinstanceDataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TCommisionFeeDataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TContractExtendCxDataLoader;
 import com.transglobe.streamingetl.ods.load.bean.TContractExtendLogDataLoader;
@@ -83,7 +84,7 @@ public class LoadDataApp {
 				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKImage);
 				
 			} else if (StringUtils.equals(config.sourceTableJbpmVariableinstance, tableName)) {
-				dataloader = new TImageDataLoader(config, dataDate);
+				dataloader = new JbpmVariableinstanceDataLoader(config, dataDate);
 				dataloader.run();
 				
 				// update statistics

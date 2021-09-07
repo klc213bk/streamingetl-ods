@@ -150,7 +150,6 @@ public class Config {
 			config.logminerDbPassword = prop.getProperty("logminer.db.password");
 			
 			config.streamingEtlNameTCommisionFee = prop.getProperty("streaming.etl.name.t_commission_fee");
-
 			config.streamingEtlNameTContractExtendCx = prop.getProperty("streaming.etl.name.t_contract_extend_cx");
 			config.streamingEtlNameTContractExtendLog = prop.getProperty("streaming.etl.name.t_contract_extend_log");
 			config.streamingEtlNameTContractProductLog = prop.getProperty("streaming.etl.name.t_contract_product_log");

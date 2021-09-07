@@ -24,6 +24,16 @@ public class ConsumerApp {
 	private static BasicDataSource sourceConnPool;
 
 	public static void main(String[] args) { 
+		logger.info(">>> start run ConsumerApp");
+		
+		String tableName = null; // 
+		if (args.length != 0) {
+			tableName = args[0];
+		} else {
+			logger.error("Should provide an Table Name argument");
+			System.exit(1);
+		}
+		
 		String profileActive = System.getProperty("profile.active", "");
 		String configFile = StringUtils.isBlank(profileActive)? CONFIG_FILE_NAME : profileActive + "/" + CONFIG_FILE_NAME;
 
@@ -35,13 +45,13 @@ public class ConsumerApp {
 			e1.printStackTrace();
 		}
 
-		String groupId = config.groupId;
+		//String groupId = config.groupId;
 
 		sourceConnPool = new BasicDataSource();
-//		sourceConnPool.setUrl(config.sourceDbUrl);
-//		sourceConnPool.setUsername(config.sourceDbUsername);
-//		sourceConnPool.setPassword(config.sourceDbPassword);
-//		sourceConnPool.setDriverClassName(config.sourceDbDriver);
+		sourceConnPool.setUrl(config.sourceDbUrl);
+		sourceConnPool.setUsername(config.sourceDbUsername);
+		sourceConnPool.setPassword(config.sourceDbPassword);
+		sourceConnPool.setDriverClassName(config.sourceDbDriver);
 		sourceConnPool.setMaxTotal(3);
 
 		sinkConnPool = new BasicDataSource();
@@ -49,24 +59,26 @@ public class ConsumerApp {
 		sinkConnPool.setUsername(null);
 		sinkConnPool.setPassword(null);
 		sinkConnPool.setDriverClassName(config.sinkDbDriver);
-		sinkConnPool.setMaxTotal(3);
+		sinkConnPool.setMaxTotal(1);
 
-		ExecutorService executor = Executors.newFixedThreadPool(NUM_CONSUMERS + 2);
+		ExecutorService executor = Executors.newFixedThreadPool(NUM_CONSUMERS);
 
-		final List<ConsumerLoop2> consumers = new ArrayList<>();
-		for (int i = 0; i < NUM_CONSUMERS; i++) {
-			ConsumerLoop2 consumer = new ConsumerLoop2((i + 1), groupId, config, sourceConnPool, sinkConnPool);
-			consumers.add(consumer);
-			executor.submit(consumer);
+		final List<ConsumerLoop> consumers = new ArrayList<>();
+		ConsumerLoop consumerLoop = null;
+		for (int id = 0; id < NUM_CONSUMERS; id++) {
+			
+			if (StringUtils.equals(config.sourceTableTPolicyPrintJob, tableName)) {
+				consumerLoop = new PolicyPrintJobConsumerLoop(id, config, sourceConnPool, sinkConnPool);
+			}
+			consumers.add(consumerLoop);
+			executor.submit(consumerLoop);
 		}
-		Cleanup cleanup = new Cleanup(config);
-		executor.submit(cleanup);
 		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
-				for (ConsumerLoop2 consumer : consumers) {
-					consumer.shutdown();
+				for (ConsumerLoop consumerLoop : consumers) {
+					consumerLoop.shutdown();
 				} 
 				
 				try {
