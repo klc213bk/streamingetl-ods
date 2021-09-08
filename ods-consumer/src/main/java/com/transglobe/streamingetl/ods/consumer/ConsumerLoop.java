@@ -1,5 +1,6 @@
 package com.transglobe.streamingetl.ods.consumer;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -38,12 +39,23 @@ public abstract class ConsumerLoop implements Runnable {
 	protected BasicDataSource sinkConnPool;
 	
 	protected Date dataDate;
+	
+	protected ObjectMapper objectMapper;
+	
+	protected BigDecimal scn;
+	
+	protected String operation;
+	
+	protected String tableName;
 
+	protected JsonNode payload;
+	
 	public ConsumerLoop(int id,
 			String groupId,  
 			Config config,
 			BasicDataSource sourceConnPool,
 			BasicDataSource sinkConnPool) {
+		
 		this.config = config;
 		this.sourceConnPool = sourceConnPool;
 		this.sinkConnPool = sinkConnPool;
@@ -58,7 +70,7 @@ public abstract class ConsumerLoop implements Runnable {
 		props.put("max.poll.records", 50 );
 		this.consumer = new KafkaConsumer<>(props);
 		
-
+		this.scn = BigDecimal.ZERO;
 	}
 
 	
@@ -114,7 +126,7 @@ public abstract class ConsumerLoop implements Runnable {
 
 		}
 	}
-	abstract protected void consume(ConsumerRecord<String, String> record) throws Exception;
+	abstract protected void consume() throws Exception;
 	
 	@Override
 	public void run() {
@@ -133,21 +145,29 @@ public abstract class ConsumerLoop implements Runnable {
 					
 					for (ConsumerRecord<String, String> record : records) {
 						
-						
-						Connection sourceConn = null;
-						Connection sinkConn = null;
 						try {	
 							dataDate = new Date(System.currentTimeMillis());
+							
+							objectMapper = new ObjectMapper();
+							objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+							
+							JsonNode jsonNode = objectMapper.readTree(record.value());
+							this.payload = jsonNode.get("payload");
+							//	payloadStr = payload.toString();
 
+							this.operation = this.payload.get("OPERATION").asText();
+							this.scn = new BigDecimal(this.payload.get("OPERATION").toString());
+
+							this.tableName = this.payload.get("TABLE_NAME").asText();
+							logger.info("   >>>offset={},operation={}, TableName={}, scn={}", record.offset(), this.operation, this.tableName, this.scn);
+
+						
 							// do business logic
-							consume(record);
+							consume();
 							
 						} catch(Exception e) {
 							logger.error(">>>record error, message={}, stack trace={}, record str={}", e.getMessage(), ExceptionUtils.getStackTrace(e));
-						} finally {
-							if (sinkConn != null) sinkConn.close();
-							if (sourceConn != null) sourceConn.close();
-						}
+						} 
 					}
 					
 				}
