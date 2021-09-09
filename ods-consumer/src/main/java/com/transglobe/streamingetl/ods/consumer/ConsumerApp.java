@@ -43,6 +43,7 @@ public class ConsumerApp {
 		} catch (Exception e1) {
 			logger.error(">>>message={}, stack trace={}", e1.getMessage(), ExceptionUtils.getStackTrace(e1));
 			e1.printStackTrace();
+			throw new RuntimeException(e1);
 		}
 
 		//String groupId = config.groupId;
@@ -69,8 +70,13 @@ public class ConsumerApp {
 			
 			if (StringUtils.equals(config.sourceTableTPolicyPrintJob, tableName)) {
 				consumerLoop = new PolicyPrintJobConsumerLoop(id, config, sourceConnPool, sinkConnPool);
+			} else {
+				logger.error(">>>message=No match table Name:", tableName);
+				throw new RuntimeException("No match table Name:"+ tableName);
 			}
 			consumers.add(consumerLoop);
+			
+			logger.info(">>>executor:{}", executor);
 			executor.submit(consumerLoop);
 		}
 		
