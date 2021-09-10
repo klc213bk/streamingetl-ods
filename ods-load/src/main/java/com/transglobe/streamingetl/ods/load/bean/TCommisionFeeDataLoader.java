@@ -176,6 +176,7 @@ public class TCommisionFeeDataLoader extends DataLoader {
 		+ ",EXCHANGE_DATE"
 		+ ",EXCHANGE_RATE"
 		+ ",HEAD_AGENT_ID"
+		+ ",ROWID"
 		+ " from " + this.sourceTableName
 		+ " a where ? <= a.FEE_ID and a.FEE_ID < ?";
 	}
@@ -280,7 +281,7 @@ public class TCommisionFeeDataLoader extends DataLoader {
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",CURRENT_DATE,?,?,?,?,?,?,?,?,?,?,?,NULL)";
+				+ ",CURRENT_DATE,?,?,?,?,?,?,?,?,?,?,?,?)";
 			
 	}
 
@@ -409,6 +410,7 @@ Console cnsl = null;
 
 					sinkPstmt.setLong(90, loadBean.currentScn);				// new column				// new column
 					sinkPstmt.setLong(91, loadBean.currentScn);				// new column
+					sinkPstmt.setString(92,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();
 

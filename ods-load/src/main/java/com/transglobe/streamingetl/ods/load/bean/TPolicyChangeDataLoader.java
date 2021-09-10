@@ -129,6 +129,7 @@ public class TPolicyChangeDataLoader extends DataLoader {
 				+ ",TASK_DUE_DATE"
 				+ ",ALTERATION_INFO_ID"
 				+ ",POLICY_CHG_ORDER_SEQ" 
+				+ ",ROWID"
 				+ " from " + this.sourceTableName
 				+ " a where ? <= a.POLICY_CHG_ID and a.POLICY_CHG_ID < ?";
 	}
@@ -186,7 +187,7 @@ public class TPolicyChangeDataLoader extends DataLoader {
 				+ ",ROW_ID)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",?,?,?,?,CURRENT_DATE,?,?,NULL)";
+				+ ",?,?,?,?,CURRENT_DATE,?,?,?)";
 			
 	}
 
@@ -271,6 +272,7 @@ public class TPolicyChangeDataLoader extends DataLoader {
 					
 					sinkPstmt.setLong(45, loadBean.currentScn);				// new column
 					sinkPstmt.setLong(46, loadBean.currentScn);				// new column
+					sinkPstmt.setString(47,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();
 

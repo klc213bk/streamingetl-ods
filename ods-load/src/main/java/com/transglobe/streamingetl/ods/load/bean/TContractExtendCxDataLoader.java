@@ -97,6 +97,7 @@ public class TContractExtendCxDataLoader extends DataLoader {
 		+ ",OPER_TYPE"
 		+ ",LOG_TYPE"
 		+ ",CHANGE_SEQ"
+		+ ",ROWID"
 		+ " from " + this.sourceTableName
 		+ " a where ? <= a.LOG_ID and a.LOG_ID < ?";
 	}
@@ -118,7 +119,7 @@ public class TContractExtendCxDataLoader extends DataLoader {
 				+ ",SCN"		// new column
 				+ ",COMMIT_SCN"	// new column
 				+ ",ROW_ID)"	// new column
-				+ " values (?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,NULL)";
+				+ " values (?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,?)";
 
 	}
 
@@ -167,6 +168,7 @@ public class TContractExtendCxDataLoader extends DataLoader {
 					//TBL_UPD_TIME
 					sinkPstmt.setLong(11, loadBean.currentScn);				// new column				// new column
 					sinkPstmt.setLong(12, loadBean.currentScn);				// new column
+					sinkPstmt.setString(13,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();
 

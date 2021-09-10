@@ -222,6 +222,7 @@ public class TProductCommisionDataLoader extends DataLoader {
 				+ ",CHECK_ENTER_TIME"
 				+ ",SERVICE_ID"
 				+ ",ORDER_ID" 
+				+ ",ROWID"
 				+ " from " + this.sourceTableName
 				+ " a where ? <= a.ITEM_ID and a.ITEM_ID < ?";
 	}
@@ -371,7 +372,7 @@ public class TProductCommisionDataLoader extends DataLoader {
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,?"
-				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NULL)";
+				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 			
 	}
 
@@ -543,6 +544,7 @@ public class TProductCommisionDataLoader extends DataLoader {
 
 					sinkPstmt.setLong(133, loadBean.currentScn);		// new column
 					sinkPstmt.setLong(134, loadBean.currentScn);		// new column
+					sinkPstmt.setString(135,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();
 

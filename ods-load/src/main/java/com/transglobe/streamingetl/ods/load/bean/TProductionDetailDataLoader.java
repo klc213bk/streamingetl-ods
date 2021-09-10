@@ -135,6 +135,7 @@ public class TProductionDetailDataLoader extends DataLoader {
 		+ ",ORDER_ID"
 		+ ",ASSIGN_RATE"
 		+ ",ACCEPT_ID"
+		+ ",ROWID"
 		+ " from " + this.sourceTableName
 		+ " a where ? <= a.DETAIL_ID and a.DETAIL_ID < ?";
 	}
@@ -195,7 +196,7 @@ public class TProductionDetailDataLoader extends DataLoader {
 				+ ",ROW_ID)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",?,?,?,?,?,?,?,CURRENT_DATE,?,?,NULL)";
+				+ ",?,?,?,?,?,?,?,CURRENT_DATE,?,?,?)";
 			
 	}
 
@@ -286,6 +287,7 @@ Console cnsl = null;
 					
 					sinkPstmt.setLong(48, loadBean.currentScn);				// new column
 					sinkPstmt.setLong(49, loadBean.currentScn);				// new column
+					sinkPstmt.setString(50,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();
 

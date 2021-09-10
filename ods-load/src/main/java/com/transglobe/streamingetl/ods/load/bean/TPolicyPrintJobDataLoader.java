@@ -122,6 +122,7 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 				+ ",LANG_ID"
 				+ ",CHANGE_ID"
 				+ ",PRINT_COMP_INDI" 
+				+ ",ROWID"
 				+ " from " + this.sourceTableName
 				+ " a where ? <= a.JOB_ID and a.JOB_ID < ?";
 	}
@@ -171,7 +172,7 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 				+ ",COMMIT_SCN"	// new column
 				+ ",ROW_ID)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,NULL)";
+				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,?)";
 			
 	}
 
@@ -328,7 +329,8 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 					
 					sinkPstmt.setLong(38, loadBean.currentScn);				// new column
 					sinkPstmt.setLong(39, loadBean.currentScn);				// new column
-
+					sinkPstmt.setString(40,  rs.getString("ROWID"));		// new column
+					
 					sinkPstmt.addBatch();
 
 					if (count % this.batchCommitSize == 0) {

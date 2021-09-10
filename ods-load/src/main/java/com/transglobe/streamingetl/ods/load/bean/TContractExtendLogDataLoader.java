@@ -119,6 +119,7 @@ public class TContractExtendLogDataLoader extends DataLoader {
 		+ ",BUCKET_FILLING_DUE_DATE"
 		+ ",ILP_DUE_DATE"
 		+ ",WAIVER_SOURCE"
+		+ ",ROWID"
 		+ " from " + this.sourceTableName
 		+ " a where ? <= a.LOG_ID and a.LOG_ID < ?";
 	}
@@ -162,7 +163,7 @@ public class TContractExtendLogDataLoader extends DataLoader {
 				+ ",COMMIT_SCN"	// new column
 				+ ",ROW_ID)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,NULL)";
+				+ ",?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,?)";
 	}
 
 	@Override
@@ -232,6 +233,7 @@ public class TContractExtendLogDataLoader extends DataLoader {
 					//TBL_UPD_TIME
 					sinkPstmt.setLong(32, loadBean.currentScn);				// new column				// new column
 					sinkPstmt.setLong(33, loadBean.currentScn);				// new column
+					sinkPstmt.setString(34,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();
 

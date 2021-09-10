@@ -130,6 +130,7 @@ public class TImageDataLoader extends DataLoader {
 		+ ",REAL_WIDTH"
 		+ ",SIG_SEQ_NUMBER"
 		+ ",SCAN_ORDER"
+		+ ",ROWID"
 		+ " from " + this.sourceTableName
 		+ " a where ? <= a.IMAGE_ID and a.IMAGE_ID < ?";
 	}
@@ -187,7 +188,7 @@ public class TImageDataLoader extends DataLoader {
 				+ ",ROW_ID)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",?,?,?,?,CURRENT_DATE,?,?,NULL)";
+				+ ",?,?,?,?,CURRENT_DATE,?,?,?)";
 			
 	}
 
@@ -377,6 +378,7 @@ Console cnsl = null;
 					
 					sinkPstmt.setLong(45, loadBean.currentScn);				// new column				// new column
 					sinkPstmt.setLong(46, loadBean.currentScn);				// new column
+					sinkPstmt.setString(47,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();
 

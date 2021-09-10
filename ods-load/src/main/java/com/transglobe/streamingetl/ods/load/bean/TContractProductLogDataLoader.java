@@ -299,6 +299,7 @@ public class TContractProductLogDataLoader extends DataLoader {
 		+ ",ORIGIN_PRODUCT_VERSION_ID"
 		+ ",TRANSFORM_DATE"
 		+ ",HEALTH_INSURANCE_VERSION"
+		+ ",ROWID"
 		+ " from " + this.sourceTableName
 		+ " a where ? <= a.LOG_ID and a.LOG_ID < ?";
 	}
@@ -512,7 +513,7 @@ public class TContractProductLogDataLoader extends DataLoader {
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,NULL)";
+				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,?)";
 	}
 
 	@Override
@@ -744,6 +745,7 @@ public class TContractProductLogDataLoader extends DataLoader {
 					//TBL_UPD_TIME
 					sinkPstmt.setLong(194, loadBean.currentScn);				// new column				// new column
 					sinkPstmt.setLong(195, loadBean.currentScn);				// new column
+					sinkPstmt.setString(196,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();
 
