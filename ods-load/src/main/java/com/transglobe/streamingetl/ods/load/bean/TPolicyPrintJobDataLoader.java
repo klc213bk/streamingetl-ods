@@ -167,9 +167,11 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 				+ ",PRINT_COMP_INDI "                        
 				+ ",DATA_DATE       "		// ods add column 	        
 				+ ",TBL_UPD_TIME  "			// ods add column
-				+ ",TBL_UPD_SCN)"	// new column
+				+ ",SCN"		// new column
+				+ ",COMMIT_SCN"	// new column
+				+ ",ROW_ID)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?)";
+				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,NULL)";
 			
 	}
 
@@ -325,6 +327,7 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 					// db current_time for tbl_upd_time 
 					
 					sinkPstmt.setLong(38, loadBean.currentScn);				// new column
+					sinkPstmt.setLong(39, loadBean.currentScn);				// new column
 
 					sinkPstmt.addBatch();
 

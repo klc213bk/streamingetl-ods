@@ -12,5 +12,5 @@ public class LoadBean {
 	public long span;
 	public long count = 0L;
 	public Long currentScn;
-	public Timestamp currentScnTimestamp;
+
 }

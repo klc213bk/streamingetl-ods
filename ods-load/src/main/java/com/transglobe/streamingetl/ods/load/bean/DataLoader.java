@@ -288,7 +288,7 @@ public abstract class DataLoader {
 				loadBean.loadBeanSize = loadBeanList.size();
 				loadBean.startTime = System.currentTimeMillis();
 				loadBean.currentScn= currentScn;
-				loadBean.currentScnTimestamp = currentScnTimestamp;
+		
 			}
 
 			t1 = System.currentTimeMillis();

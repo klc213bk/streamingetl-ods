@@ -190,10 +190,12 @@ public class TProductionDetailDataLoader extends DataLoader {
 				+ ",ASSIGN_RATE"
 				+ ",DATA_DATE"				// ods add column
 				+ ",TBL_UPD_TIME"			// ods add column
-				+ ",TBL_UPD_SCN)"	// new column
+				+ ",SCN"		// new column
+				+ ",COMMIT_SCN"	// new column
+				+ ",ROW_ID)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",?,?,?,?,?,?,?,CURRENT_DATE,?)";
+				+ ",?,?,?,?,?,?,?,CURRENT_DATE,?,?,NULL)";
 			
 	}
 
@@ -282,7 +284,8 @@ Console cnsl = null;
 					
 					// db current_time for tbl_upd_time 
 					
-					sinkPstmt.setLong(48, loadBean.currentScn);				// new column				// new column
+					sinkPstmt.setLong(48, loadBean.currentScn);				// new column
+					sinkPstmt.setLong(49, loadBean.currentScn);				// new column
 					
 					sinkPstmt.addBatch();
 

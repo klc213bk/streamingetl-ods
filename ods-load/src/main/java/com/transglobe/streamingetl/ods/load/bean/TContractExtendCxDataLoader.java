@@ -115,8 +115,10 @@ public class TContractExtendCxDataLoader extends DataLoader {
 				+ ",CHANGE_SEQ" 
 				+ ",DATA_DATE" 		// ods add column 
 				+ ",TBL_UPD_TIME"	// ods add column
-				+ ",TBL_UPD_SCN)"	// new column
-				+ " values (?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?)";
+				+ ",SCN"		// new column
+				+ ",COMMIT_SCN"	// new column
+				+ ",ROW_ID)"	// new column
+				+ " values (?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,NULL)";
 
 	}
 
@@ -164,7 +166,8 @@ public class TContractExtendCxDataLoader extends DataLoader {
 					sinkPstmt.setDate(10, dataDate);
 					//TBL_UPD_TIME
 					sinkPstmt.setLong(11, loadBean.currentScn);				// new column				// new column
-
+					sinkPstmt.setLong(12, loadBean.currentScn);				// new column
+					
 					sinkPstmt.addBatch();
 
 					if (count % this.batchCommitSize == 0) {

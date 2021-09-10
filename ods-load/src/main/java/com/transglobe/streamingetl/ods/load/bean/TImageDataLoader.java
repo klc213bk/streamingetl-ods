@@ -182,10 +182,12 @@ public class TImageDataLoader extends DataLoader {
 				+ ",SCAN_ORDER"
 				+ ",DATA_DATE"				// ods add column
 				+ ",TBL_UPD_TIME"			// ods add column
-				+ ",TBL_UPD_SCN)"	// new column
+				+ ",SCN"		// new column
+				+ ",COMMIT_SCN"	// new column
+				+ ",ROW_ID)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",?,?,?,?,CURRENT_DATE,?)";
+				+ ",?,?,?,?,CURRENT_DATE,?,?,NULL)";
 			
 	}
 
@@ -374,6 +376,7 @@ Console cnsl = null;
 					// db current_time for tbl_upd_time 
 					
 					sinkPstmt.setLong(45, loadBean.currentScn);				// new column				// new column
+					sinkPstmt.setLong(46, loadBean.currentScn);				// new column
 					
 					sinkPstmt.addBatch();
 

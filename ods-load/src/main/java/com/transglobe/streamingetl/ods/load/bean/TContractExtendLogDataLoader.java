@@ -158,9 +158,11 @@ public class TContractExtendLogDataLoader extends DataLoader {
 				+ ",ILP_DUE_DATE"
 				+ ",DATA_DATE" 		// ods add column 
 				+ ",TBL_UPD_TIME"	// ods add column
-				+ ",TBL_UPD_SCN)"	// new column
+				+ ",SCN"		// new column
+				+ ",COMMIT_SCN"	// new column
+				+ ",ROW_ID)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?)";
+				+ ",?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,NULL)";
 	}
 
 	@Override
@@ -229,7 +231,8 @@ public class TContractExtendLogDataLoader extends DataLoader {
 						
 					//TBL_UPD_TIME
 					sinkPstmt.setLong(32, loadBean.currentScn);				// new column				// new column
-
+					sinkPstmt.setLong(33, loadBean.currentScn);				// new column
+					
 					sinkPstmt.addBatch();
 
 					if (count % this.batchCommitSize == 0) {

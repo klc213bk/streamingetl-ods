@@ -128,8 +128,10 @@ public class JbpmVariableinstanceDataLoader extends DataLoader {
 				+ ",TASKINSTANCE_"
 				+ ",DATA_DATE"				// ods add column
 				+ ",TBL_UPD_TIME"			// ods add column
-				+ ",TBL_UPD_SCN)"	// new column
-				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?)";
+				+ ",SCN"		// new column
+				+ ",COMMIT_SCN"	// new column
+				+ ",ROW_ID)"	// new column
+				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,NULL)";
 			
 	}
 
@@ -186,7 +188,8 @@ Console cnsl = null;
 					
 					// db current_time for tbl_upd_time 
 					
-					sinkPstmt.setLong(18, loadBean.currentScn);				// new column				// new column
+					sinkPstmt.setLong(18, loadBean.currentScn);				// new column
+					sinkPstmt.setLong(19, loadBean.currentScn);				// new column// new column
 					
 					sinkPstmt.addBatch();
 
