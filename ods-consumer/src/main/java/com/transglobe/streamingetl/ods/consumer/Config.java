@@ -43,22 +43,6 @@ public class Config {
 	public String sinkTableKPolicyPrintJob;
 	public String sinkTableKProductCommision;
 	public String sinkTableKProductionDetail;
-
-	public String logminerDbDriver;
-	public String logminerDbUrl;
-	public String logminerDbUsername;
-	public String logminerDbPassword;
-	
-	public String streamingEtlNameTCommisionFee;
-	public String streamingEtlNameTContractExtendCx;
-	public String streamingEtlNameTContractExtendLog;
-	public String streamingEtlNameTContractProductLog;
-	public String streamingEtlNameTImage;
-	public String streamingEtlNameJbpmVariableinstance;
-	public String streamingEtlNameTPolicyChange;
-	public String streamingEtlNameTPolicyPrintJob;
-	public String streamingEtlNameTProductCommision;
-	public String streamingEtlNameTProductionDetail;
 	
 	public String bootstrapServers;
 	
@@ -127,22 +111,6 @@ public class Config {
 			config.sinkTableKProductCommision = prop.getProperty("sink.table.k_product_commision");
 			config.sinkTableKProductionDetail = prop.getProperty("sink.table.k_production_detail");
 			
-			config.logminerDbDriver = prop.getProperty("logminer.db.driver");
-			config.logminerDbUrl = prop.getProperty("logminer.db.url");
-			config.logminerDbUsername = prop.getProperty("logminer.db.username");
-			config.logminerDbPassword = prop.getProperty("logminer.db.password");
-			
-			config.streamingEtlNameTCommisionFee = prop.getProperty("streaming.etl.name.t_commission_fee");
-			config.streamingEtlNameTContractExtendCx = prop.getProperty("streaming.etl.name.t_contract_extend_cx");
-			config.streamingEtlNameTContractExtendLog = prop.getProperty("streaming.etl.name.t_contract_extend_log");
-			config.streamingEtlNameTContractProductLog = prop.getProperty("streaming.etl.name.t_contract_product_log");
-			config.streamingEtlNameTImage= prop.getProperty("streaming.etl.name.t_image");
-			config.streamingEtlNameJbpmVariableinstance = prop.getProperty("streaming.etl.name.jbpm_variableinstance");
-			config.streamingEtlNameTPolicyChange = prop.getProperty("streaming.etl.name.t_policy_change");
-			config.streamingEtlNameTPolicyPrintJob = prop.getProperty("streaming.etl.name.t_policy_print_job");
-			config.streamingEtlNameTProductCommision = prop.getProperty("streaming.etl.name.t_product_commision");
-			config.streamingEtlNameTProductionDetail = prop.getProperty("streaming.etl.name.t_production_detail");
-
 			config.bootstrapServers = prop.getProperty("bootstrap.servers");
 			
 			config.groupIdTCommisionFee = prop.getProperty("group.id.t_commision_fee");

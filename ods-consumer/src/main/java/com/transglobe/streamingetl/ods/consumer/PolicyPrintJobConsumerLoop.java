@@ -1,5 +1,6 @@
 package com.transglobe.streamingetl.ods.consumer;
 
+import java.math.BigDecimal;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Date;
@@ -12,6 +13,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.transglobe.streamingetl.ods.consumer.model.PolicyPrintJob;
 
 public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
@@ -20,40 +22,43 @@ public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 	public PolicyPrintJobConsumerLoop(int id,
 			Config config,
 			BasicDataSource sourceConnPool,
-			BasicDataSource sinkConnPool) {
+			BasicDataSource sinkConnPool,
+			Date dataDate)
+	{
 		
-		super(id, config.groupIdTPolicyPrintJob, config, sourceConnPool, sinkConnPool);
+		super(id, config.groupIdTPolicyPrintJob, config.topicsTPolicyPrintJob, config.bootstrapServers, config.sinkTableKPolicyPrintJob, sourceConnPool, sinkConnPool, dataDate);
 		
 	}
 
+//	@Override
+//	protected void consume() throws Exception {
+//	
+//		Connection sourceConn = null;
+//		Connection sinkConn = null;
+//		try {	
+//			sinkConn = sinkConnPool.getConnection();
+//			
+//			if (StringUtils.equals("INSERT", operation)) {
+//				insert(sinkConn);
+//			} else if (StringUtils.equals("UPDATE", operation)) {
+//				update(sinkConn);
+//			} else if (StringUtils.equals("DELETE", operation)) {
+//				delete(sinkConn);
+//			}
+//		} finally {
+//			if (sinkConn != null) sinkConn.close();
+//			if (sourceConn != null) sourceConn.close();
+//		}
+//		
+//	}
 	@Override
-	protected void consume() throws Exception {
-	
-		Connection sourceConn = null;
-		Connection sinkConn = null;
-		try {	
-			sinkConn = sinkConnPool.getConnection();
-			
-			if (StringUtils.equals("INSERT", operation)) {
-				insert(sinkConn);
-			} else if (StringUtils.equals("UPDATE", operation)) {
-				update(sinkConn);
-			} else if (StringUtils.equals("DELETE", operation)) {
-				delete(sinkConn);
-			}
-		} finally {
-			if (sinkConn != null) sinkConn.close();
-			if (sourceConn != null) sourceConn.close();
-		}
-		
-	}
-	private void delete(Connection sinkConn) throws Exception  {
+	void delete(Connection sinkConn, ObjectMapper objectMapper, String dataString, String beforeString, BigDecimal scn,
+			BigDecimal commitScn, String rowId) throws Exception {
 		PreparedStatement sinkPstmt = null;
 		try {
-			String beforeData = this.payload.get("before").toString();
-			PolicyPrintJob obj = (beforeData == null)? null : this.objectMapper.readValue(beforeData, PolicyPrintJob.class);;
+			PolicyPrintJob obj = (beforeString == null)? null : objectMapper.readValue(beforeString, PolicyPrintJob.class);;
 			
-			String sql = "delete " + config.sinkTableKPolicyPrintJob
+			String sql = "delete " + sinkTableName
 					+ " where JOB_ID=?";
 		
 			sinkPstmt = sinkConn.prepareStatement(sql);		
@@ -68,13 +73,14 @@ public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 			if (sinkPstmt != null) sinkPstmt.close();
 		}
 	}
-	private void update(Connection sinkConn) throws Exception  {
+	@Override
+	void update(Connection sinkConn, ObjectMapper objectMapper, String dataString, String beforeString, BigDecimal scn,
+			BigDecimal commitScn, String rowId) throws Exception {
 		PreparedStatement sinkPstmt = null;
 		try {
-			String payloadData = this.payload.get("data").toString();
-			PolicyPrintJob obj = (payloadData == null)? null : this.objectMapper.readValue(payloadData, PolicyPrintJob.class);;
+			PolicyPrintJob obj = (dataString == null)? null : objectMapper.readValue(dataString, PolicyPrintJob.class);;
 			
-			String sql = "update " + config.sinkTableKPolicyPrintJob
+			String sql = "update " + this.sinkTableName
 					+ " set JOB_ID=?"                                  
 					+ ",POLICY_ID=?"                             
 					+ ",PAYCARD_INDI=?"                           
@@ -113,7 +119,9 @@ public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 					+ ",PRINT_COMP_INDI=? "                        
 					+ ",DATA_DATE=?"		// ods add column 	        
 					+ ",TBL_UPD_TIME=CURRENT_DATE"			// ods add column
-					+ ",TBL_UPD_SCN=?"	// new column
+					+ ",SCN=?"	// new column
+					+ ",COMMIT_SCN=?"	// new column
+					+ ",ROW_ID=?"	// new column
 					+ " where JOB_ID=?";
 		
 			sinkPstmt = sinkConn.prepareStatement(sql);
@@ -163,9 +171,11 @@ public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 			
 			// db current_time for tbl_upd_time 
 			
-			sinkPstmt.setBigDecimal(38, this.scn);				// new column
+			sinkPstmt.setBigDecimal(38, scn);				// new column
+			sinkPstmt.setBigDecimal(39, commitScn);				// new column
+			sinkPstmt.setString(40, rowId);				// new column
 			
-			sinkPstmt.setBigDecimal(39, obj.getJobId());
+			sinkPstmt.setBigDecimal(41, obj.getJobId());
 	
 			sinkPstmt.executeUpdate();
 			sinkPstmt.close();
@@ -176,13 +186,14 @@ public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 			if (sinkPstmt != null) sinkPstmt.close();
 		}
 	}
-	private void insert(Connection sinkConn) throws Exception  {
+	@Override
+	void insert(Connection sinkConn, ObjectMapper objectMapper, String dataString, String beforeString, BigDecimal scn,
+			BigDecimal commitScn, String rowId) throws Exception {
 		PreparedStatement sinkPstmt = null;
 		try {
-			String payloadData = this.payload.get("data").toString();
-			PolicyPrintJob obj = (payloadData == null)? null : this.objectMapper.readValue(payloadData, PolicyPrintJob.class);;
+			PolicyPrintJob obj = (dataString == null)? null : objectMapper.readValue(dataString, PolicyPrintJob.class);
 			
-			String sql = "insert into " + config.sinkTableKPolicyPrintJob
+			String sql = "insert into " + this.sinkTableName
 					+ " (JOB_ID"                                  
 					+ ",POLICY_ID"                             
 					+ ",PAYCARD_INDI"                           
@@ -221,9 +232,11 @@ public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 					+ ",PRINT_COMP_INDI"                        
 					+ ",DATA_DATE"		// ods add column 	        
 					+ ",TBL_UPD_TIME "			// ods add column
-					+ ",TBL_UPD_SCN)"	// new column
+					+ ",SCN"		// new column
+					+ ",COMMIT_SCN"	// new column
+					+ ",ROW_ID)"	// new column
 					+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-					+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?)";
+					+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,?)";
 		
 			sinkPstmt = sinkConn.prepareStatement(sql);
 			
@@ -272,8 +285,10 @@ public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 			
 			// db current_time for tbl_upd_time 
 			
-			sinkPstmt.setBigDecimal(38, this.scn);				// new column
-	
+			sinkPstmt.setBigDecimal(38, scn);				// new column
+			sinkPstmt.setBigDecimal(39, commitScn);				// new column
+			sinkPstmt.setString(40, rowId);				// new column
+			
 			sinkPstmt.executeUpdate();
 			sinkPstmt.close();
 
@@ -283,5 +298,7 @@ public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 			if (sinkPstmt != null) sinkPstmt.close();
 		}
 	}
+
+
 	
 }
