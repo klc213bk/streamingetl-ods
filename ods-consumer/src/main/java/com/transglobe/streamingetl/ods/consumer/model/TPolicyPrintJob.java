@@ -5,130 +5,129 @@ import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * properties based on ODS.O_PRODUCTION_DETAIL
- * Json Property properties based on EBAO.T_PRODUCTION_DETAIL
- * @author steven
+ * Json Property properties based on EBAO.T_POLICY_PRINT_JOB
+ * Using Long for DATE, TIMESTAMP type. CLOB to String type
  *
  */
-public class PolicyPrintJob {
-
+public class TPolicyPrintJob {
+	
 	@JsonProperty("JOB_ID")
 	private BigDecimal jobId;
 
 	@JsonProperty("POLICY_ID")
 	private BigDecimal policyId;
-	
+
 	@JsonProperty("PAYCARD_INDI")
 	private String paycardIndi;
-	
+
 	@JsonProperty("LETTER_INDI")
 	private String letterIndi;
-	
+
 	@JsonProperty("ACKLETTER_INDI")
 	private String ackletterIndi;
-	
+
 	@JsonProperty("PIS_INDI")
 	private String pisIndi;
-	
+
 	@JsonProperty("HEALTH_CARD_INDI")
 	private String healthCardIndi;
-	
+
 	@JsonProperty("COVER_INDI")
 	private String coverIndi;
-	
+
 	@JsonProperty("SCHEDULE_INDI")
 	private String scheduleIndi;
-	
+
 	@JsonProperty("CLAUSE_INDI")
 	private String clauseIndi;
-	
+
 	@JsonProperty("ANNEXURE_INDI")
 	private String annexureIndi;
-	
+
 	@JsonProperty("ENDORSE_INDI")
 	private String endorseIndi;
-	
+
 	@JsonProperty("EXCLUSION_INDI")
 	private String exclusionIndi;
-	
+
 	@JsonProperty("PRINT_CATEGORY")
 	private BigDecimal printCategory;
-	
+
 	@JsonProperty("PRINT_TYPE")
 	private BigDecimal printType;
-	
+
 	@JsonProperty("PRINT_COPYSET")
 	private String printCopyset;
-	
+
 	@JsonProperty("PRINT_REASON")
 	private String printReason;
-	
+
 	@JsonProperty("VALID_STATUS")
 	private String validStatus;
-	
+
 	@JsonProperty("PRINT_DATE")
-	private Long printDateMilli;
-	
+	private Long printDate;
+
 	@JsonProperty("OPERATOR_ID")
 	private BigDecimal operatorId;
-	
+
 	@JsonProperty("INSERT_TIME")
-	private Long insertTimeMillis;
-	
+	private Long insertTime;
+
 	@JsonProperty("INSERTED_BY")
 	private BigDecimal insertedBy;
-	
+
 	@JsonProperty("INSERT_TIMESTAMP")
-	private Long insertTimestampMillis;
-	
+	private Long insertTimestamp;
+
 	@JsonProperty("UPDATED_BY")
 	private BigDecimal updatedBy;
-	
+
 	@JsonProperty("UPDATE_TIMESTAMP")
-	private Long upateTimestampMillis;
-	
+	private Long updateTimestamp;
+
 	@JsonProperty("PREMVOUCHER_INDI")
-	private String preMvoucherIndi;
-	
+	private String premvoucherIndi;
+
 	@JsonProperty("ARCHIVE_ID")
 	private BigDecimal archiveId;
-	
+
 	@JsonProperty("UPDATE_TIME")
-	private Long updateTimeMillis;
-	
+	private Long updateTime;
+
 	@JsonProperty("JOB_TYPE_DESC")
 	private String jobTypeDesc;
-	
+
 	@JsonProperty("JOB_READY_DATE")
-	private Long jobReadyDateMillis;
-	
+	private Long jobReadyDate;
+
 	@JsonProperty("CONTENT")
 	private String content;
-	
+
 	@JsonProperty("COPY")
 	private BigDecimal copy;
-	
+
 	@JsonProperty("ERROR_CODE")
 	private BigDecimal errorCode;
-	
+
 	@JsonProperty("LANG_ID")
 	private String langId;
-	
+
 	@JsonProperty("CHANGE_ID")
 	private BigDecimal changeId;
-	
+
 	@JsonProperty("PRINT_COMP_INDI")
 	private BigDecimal printCompIndi;
-	
+
 	@JsonProperty("REMAKE_ID")
 	private BigDecimal remakeId;
-	
+
 	@JsonProperty("CHECK_ID")
 	private BigDecimal checkId;
-	
+
 	@JsonProperty("EVA_LIST_ID")
 	private BigDecimal evaListId;
-	
+
 	@JsonProperty("URGENT_INDI")
 	private String urgentIndi;
 
@@ -276,12 +275,12 @@ public class PolicyPrintJob {
 		this.validStatus = validStatus;
 	}
 
-	public Long getPrintDateMilli() {
-		return printDateMilli;
+	public Long getPrintDate() {
+		return printDate;
 	}
 
-	public void setPrintDateMilli(Long printDateMilli) {
-		this.printDateMilli = printDateMilli;
+	public void setPrintDate(Long printDate) {
+		this.printDate = printDate;
 	}
 
 	public BigDecimal getOperatorId() {
@@ -292,12 +291,12 @@ public class PolicyPrintJob {
 		this.operatorId = operatorId;
 	}
 
-	public Long getInsertTimeMillis() {
-		return insertTimeMillis;
+	public Long getInsertTime() {
+		return insertTime;
 	}
 
-	public void setInsertTimeMillis(Long insertTimeMillis) {
-		this.insertTimeMillis = insertTimeMillis;
+	public void setInsertTime(Long insertTime) {
+		this.insertTime = insertTime;
 	}
 
 	public BigDecimal getInsertedBy() {
@@ -308,12 +307,12 @@ public class PolicyPrintJob {
 		this.insertedBy = insertedBy;
 	}
 
-	public Long getInsertTimestampMillis() {
-		return insertTimestampMillis;
+	public Long getInsertTimestamp() {
+		return insertTimestamp;
 	}
 
-	public void setInsertTimestampMillis(Long insertTimestampMillis) {
-		this.insertTimestampMillis = insertTimestampMillis;
+	public void setInsertTimestamp(Long insertTimestamp) {
+		this.insertTimestamp = insertTimestamp;
 	}
 
 	public BigDecimal getUpdatedBy() {
@@ -324,20 +323,20 @@ public class PolicyPrintJob {
 		this.updatedBy = updatedBy;
 	}
 
-	public Long getUpateTimestampMillis() {
-		return upateTimestampMillis;
+	public Long getUpdateTimestamp() {
+		return updateTimestamp;
 	}
 
-	public void setUpateTimestampMillis(Long upateTimestampMillis) {
-		this.upateTimestampMillis = upateTimestampMillis;
+	public void setUpdateTimestamp(Long updateTimestamp) {
+		this.updateTimestamp = updateTimestamp;
 	}
 
-	public String getPreMvoucherIndi() {
-		return preMvoucherIndi;
+	public String getPremvoucherIndi() {
+		return premvoucherIndi;
 	}
 
-	public void setPreMvoucherIndi(String preMvoucherIndi) {
-		this.preMvoucherIndi = preMvoucherIndi;
+	public void setPremvoucherIndi(String premvoucherIndi) {
+		this.premvoucherIndi = premvoucherIndi;
 	}
 
 	public BigDecimal getArchiveId() {
@@ -348,12 +347,12 @@ public class PolicyPrintJob {
 		this.archiveId = archiveId;
 	}
 
-	public Long getUpdateTimeMillis() {
-		return updateTimeMillis;
+	public Long getUpdateTime() {
+		return updateTime;
 	}
 
-	public void setUpdateTimeMillis(Long updateTimeMillis) {
-		this.updateTimeMillis = updateTimeMillis;
+	public void setUpdateTime(Long updateTime) {
+		this.updateTime = updateTime;
 	}
 
 	public String getJobTypeDesc() {
@@ -364,12 +363,12 @@ public class PolicyPrintJob {
 		this.jobTypeDesc = jobTypeDesc;
 	}
 
-	public Long getJobReadyDateMillis() {
-		return jobReadyDateMillis;
+	public Long getJobReadyDate() {
+		return jobReadyDate;
 	}
 
-	public void setJobReadyDateMillis(Long jobReadyDateMillis) {
-		this.jobReadyDateMillis = jobReadyDateMillis;
+	public void setJobReadyDate(Long jobReadyDate) {
+		this.jobReadyDate = jobReadyDate;
 	}
 
 	public String getContent() {
@@ -453,5 +452,4 @@ public class PolicyPrintJob {
 	}
 	
 	
-    
 }

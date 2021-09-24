@@ -99,47 +99,7 @@ public abstract class DataLoader {
 	public Connection getLogminerConnection() throws SQLException {
 		return logminerConnectionPool.getConnection();
 	}
-	private void initLoad() throws Exception {
-
-		logger.info(">>>  Start to dropTable");
-		dropSinkTable();
-
-		logger.info(">>>  Start to create sink Table");
-		createSinkTable();	
-	}
-
-	public void run() throws Exception {
-
-		initLoad();
-
-		logger.info(">>>  Start to STREAMING_ETL loading start");
-		Map<String, Object> map = startStreamingEtlLoading();
-
-		logger.info(">>>  Start to load data");
-		Long t0 = System.currentTimeMillis();
-
-		Long currentScn = (Long)map.get("CURRENT_SCN");
-		Timestamp currentScnTimestamp = (Timestamp)map.get("CURRENT_SCN_TIMESTAMP");
-
-		loadData(currentScn, currentScnTimestamp);
-		logger.info(">>>tableName={}, loaddataSpan={}", getSourceTableName(), (System.currentTimeMillis() - t0));
-
-
-		logger.info(">>>  Start: check source and sink data count");
-		long sourceCnt = getSourceRecordsCount();
-		long sinkCnt = getSinkRecordsCount();
-		if (sourceCnt == sinkCnt) {
-			logger.info(">>>  sourceCnt={} equals to sinkCnt={}", sourceCnt, sinkCnt);
-		} else {
-			throw new Exception("sourceCnt("+ sourceCnt + ") does not equal to sinkCnt(" + sinkCnt + ")");
-		}
-
-		logger.info(">>>  Start to update STREAMING_ETL loading finish");
-		updateStreamingEtlLoadingFinish();
-
-		logger.info(">>>  Start: createIndex");	
-		createSinkTableIndex();
-	}
+	
 	public void dropSinkTable() throws Exception {
 		String sinkTableName = getSinkTableName();
 		Connection sinkConn = null;
@@ -187,28 +147,7 @@ public abstract class DataLoader {
 		}
 	}
 
-	public Map<String, Object> startStreamingEtlLoading() throws Exception {
-		Connection logminerConn = null;
-		try {
-			logminerConn = getLogminerConnection();
-			Map<String, Object> map = StreamingEtlUtils.startStreamingEtlLoading(logminerConn, getStreamingEtlName());
-			return map;
-		} finally {
-			if (logminerConn != null) logminerConn.close();
-		}
-	}
-	public Map<String, Object> updateStreamingEtlLoadingFinish() throws Exception {
-		Connection logminerConn = null;
-		try {
-			logminerConn = getLogminerConnection();
-			Map<String, Object> map = StreamingEtlUtils.updateStreamingEtlLoadingFinishState(logminerConn, getStreamingEtlName(), CommonConstants.STREAMING_ETL_LOADING_STATE_FINISH_LOADING);
-			return map;
-		} finally {
-			if (logminerConn != null) logminerConn.close();
-		}
-	}
-
-	public void loadData(Long currentScn, Timestamp currentScnTimestamp) throws Exception {
+	public void loadData() throws Exception {
 		String selectMinIdSql = getSelectMinIdSql();
 		String selectMaxIdSql = getSelectMaxIdSql();
 		String countSql = getCountSql();
@@ -249,6 +188,9 @@ public abstract class DataLoader {
 					cnt = cntRs.getInt("CNT");
 				}
 				recordCount += cnt;
+				if (recordCount > 10000000) {
+					
+				}
 				int j = 0;
 				if (cnt > 0) {
 					if (cnt <= batchCommitSize) {
@@ -287,7 +229,6 @@ public abstract class DataLoader {
 				loadBean.tableName = sourceTableName;
 				loadBean.loadBeanSize = loadBeanList.size();
 				loadBean.startTime = System.currentTimeMillis();
-				loadBean.currentScn= currentScn;
 		
 			}
 
@@ -322,34 +263,6 @@ public abstract class DataLoader {
 
 				runStartIndex = runEndIndex;
 			}
-			
-		
-//			List<CompletableFuture<LoadBean>> futures = 
-//					loadBeanList.stream().map(t -> CompletableFuture.supplyAsync(() -> 
-//					{
-//						try {
-//							loadData(t);
-//						} catch (Exception e) {
-//							// TODO Auto-generated catch block
-//							logger.info("error message={}, trace={}", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e));
-//						}
-//						return t;
-//					}))
-//					.collect(Collectors.toList());
-
-
-//			List<LoadBean> result = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
-
-			//			double totalSpan = 0;
-			//			long totalCount = 0L;
-			//			for (LoadBean loadBean : result) {
-			//				totalSpan += loadBean.span; 
-			//				totalCount += loadBean.count;
-			//			}
-			//			long t2 = System.currentTimeMillis();
-			//			logger.info(">>>tableName={}, loadBeanSize={}, totalCount={}, loaddataSpan={}", sourceTableName, result.size(), totalCount, (t2 - t1));
-
-
 
 		} finally {
 			if (executor != null) executor.shutdown();
@@ -360,7 +273,7 @@ public abstract class DataLoader {
 		}
 
 	}
-	protected long getSourceRecordsCount() throws SQLException {
+	public long getSourceRecordsCount() throws SQLException {
 		String sourceTableName = getSourceTableName();
 
 		Connection sourceConn = null;
@@ -389,7 +302,7 @@ public abstract class DataLoader {
 			if (sourceConn != null) sourceConn.close();
 		}
 	}
-	protected long getSinkRecordsCount() throws SQLException {
+	public long getSinkRecordsCount() throws SQLException {
 		String sinkTableName = getSinkTableName();
 
 		Connection sinkConn = null;
@@ -446,7 +359,7 @@ public abstract class DataLoader {
 		try {
 			sinkConn = this.sinkConnectionPool.getConnection();
 
-			String sql = "begin \n SYS.DBMS_STATS.GATHER_TABLE_STATS(?,?); \nend;";
+			String sql = "begin \n SYS.DBMS_STATS.GATHER_TABLE_STATS(?,?,cascade=>TRUE,degree=>4); \nend;";
 
 			CallableStatement cstamt = sinkConn.prepareCall(sql);
 			cstamt.setString(1, schema);	

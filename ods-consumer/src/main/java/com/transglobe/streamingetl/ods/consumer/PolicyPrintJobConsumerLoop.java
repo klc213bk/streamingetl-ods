@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.transglobe.streamingetl.ods.consumer.model.PolicyPrintJob;
+import com.transglobe.streamingetl.ods.consumer.model.TPolicyPrintJob;
 
 public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 	static final Logger logger = LoggerFactory.getLogger(PolicyPrintJobConsumerLoop.class);
@@ -30,33 +30,12 @@ public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 		
 	}
 
-//	@Override
-//	protected void consume() throws Exception {
-//	
-//		Connection sourceConn = null;
-//		Connection sinkConn = null;
-//		try {	
-//			sinkConn = sinkConnPool.getConnection();
-//			
-//			if (StringUtils.equals("INSERT", operation)) {
-//				insert(sinkConn);
-//			} else if (StringUtils.equals("UPDATE", operation)) {
-//				update(sinkConn);
-//			} else if (StringUtils.equals("DELETE", operation)) {
-//				delete(sinkConn);
-//			}
-//		} finally {
-//			if (sinkConn != null) sinkConn.close();
-//			if (sourceConn != null) sourceConn.close();
-//		}
-//		
-//	}
 	@Override
 	void delete(Connection sinkConn, ObjectMapper objectMapper, String dataString, String beforeString, BigDecimal scn,
 			BigDecimal commitScn, String rowId) throws Exception {
 		PreparedStatement sinkPstmt = null;
 		try {
-			PolicyPrintJob obj = (beforeString == null)? null : objectMapper.readValue(beforeString, PolicyPrintJob.class);;
+			TPolicyPrintJob obj = (beforeString == null)? null : objectMapper.readValue(beforeString, TPolicyPrintJob.class);;
 			
 			String sql = "delete " + sinkTableName
 					+ " where JOB_ID=?";
@@ -78,7 +57,7 @@ public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 			BigDecimal commitScn, String rowId) throws Exception {
 		PreparedStatement sinkPstmt = null;
 		try {
-			PolicyPrintJob obj = (dataString == null)? null : objectMapper.readValue(dataString, PolicyPrintJob.class);;
+			TPolicyPrintJob obj = (dataString == null)? null : objectMapper.readValue(dataString, TPolicyPrintJob.class);;
 			
 			String sql = "update " + this.sinkTableName
 					+ " set JOB_ID=?"                                  
@@ -144,18 +123,18 @@ public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 			sinkPstmt.setString(16,  obj.getPrintCopyset());
 			sinkPstmt.setString(17,  obj.getPrintReason());
 			sinkPstmt.setString(18,  obj.getValidStatus());
-			sinkPstmt.setDate(19, new Date(obj.getPrintDateMilli()));
+			sinkPstmt.setDate(19, new Date(obj.getPrintDate()));
 			sinkPstmt.setBigDecimal(20,  obj.getOperatorId());
-			sinkPstmt.setDate(21, new Date(obj.getInsertTimeMillis()));
+			sinkPstmt.setDate(21, new Date(obj.getInsertTime()));
 			sinkPstmt.setBigDecimal(22,  obj.getInsertedBy());
-			sinkPstmt.setDate(23, new Date(obj.getInsertTimestampMillis()));
+			sinkPstmt.setDate(23, new Date(obj.getInsertTimestamp()));
 			sinkPstmt.setBigDecimal(24,  obj.getUpdatedBy());
-			sinkPstmt.setDate(25, new Date(obj.getUpateTimestampMillis()));
-			sinkPstmt.setString(26,  obj.getPreMvoucherIndi());
+			sinkPstmt.setDate(25, new Date(obj.getUpdateTimestamp()));
+			sinkPstmt.setString(26,  obj.getPremvoucherIndi());
 			sinkPstmt.setBigDecimal(27,  obj.getArchiveId());
-			sinkPstmt.setDate(28, new Date(obj.getUpdateTimeMillis()));
+			sinkPstmt.setDate(28, new Date(obj.getUpdateTime()));
 			sinkPstmt.setString(29,  obj.getJobTypeDesc());
-			sinkPstmt.setDate(30, new Date(obj.getJobReadyDateMillis()));
+			sinkPstmt.setDate(30, new Date(obj.getJobReadyDate()));
 			
 			Clob clob = sinkConn.createClob();
 			clob.setString(1, obj.getContent());
@@ -191,7 +170,7 @@ public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 			BigDecimal commitScn, String rowId) throws Exception {
 		PreparedStatement sinkPstmt = null;
 		try {
-			PolicyPrintJob obj = (dataString == null)? null : objectMapper.readValue(dataString, PolicyPrintJob.class);
+			TPolicyPrintJob obj = (dataString == null)? null : objectMapper.readValue(dataString, TPolicyPrintJob.class);
 			
 			String sql = "insert into " + this.sinkTableName
 					+ " (JOB_ID"                                  
@@ -258,18 +237,18 @@ public class PolicyPrintJobConsumerLoop extends ConsumerLoop {
 			sinkPstmt.setString(16,  obj.getPrintCopyset());
 			sinkPstmt.setString(17,  obj.getPrintReason());
 			sinkPstmt.setString(18,  obj.getValidStatus());
-			sinkPstmt.setDate(19, new Date(obj.getPrintDateMilli()));
+			sinkPstmt.setDate(19, new Date(obj.getPrintDate()));
 			sinkPstmt.setBigDecimal(20,  obj.getOperatorId());
-			sinkPstmt.setDate(21, new Date(obj.getInsertTimeMillis()));
+			sinkPstmt.setDate(21, new Date(obj.getInsertTime()));
 			sinkPstmt.setBigDecimal(22,  obj.getInsertedBy());
-			sinkPstmt.setDate(23, new Date(obj.getInsertTimestampMillis()));
+			sinkPstmt.setDate(23, new Date(obj.getInsertTimestamp()));
 			sinkPstmt.setBigDecimal(24,  obj.getUpdatedBy());
-			sinkPstmt.setDate(25, new Date(obj.getUpateTimestampMillis()));
-			sinkPstmt.setString(26,  obj.getPreMvoucherIndi());
+			sinkPstmt.setDate(25, new Date(obj.getUpdateTimestamp()));
+			sinkPstmt.setString(26,  obj.getPremvoucherIndi());
 			sinkPstmt.setBigDecimal(27,  obj.getArchiveId());
-			sinkPstmt.setDate(28, new Date(obj.getUpdateTimeMillis()));
+			sinkPstmt.setDate(28, new Date(obj.getUpdateTime()));
 			sinkPstmt.setString(29,  obj.getJobTypeDesc());
-			sinkPstmt.setDate(30, new Date(obj.getJobReadyDateMillis()));
+			sinkPstmt.setDate(30, new Date(obj.getJobReadyDate()));
 			
 			Clob clob = sinkConn.createClob();
 			clob.setString(1, obj.getContent());

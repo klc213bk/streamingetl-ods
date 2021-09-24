@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.transglobe.streamingetl.ods.consumer.model.ProductionDetail;
+import com.transglobe.streamingetl.ods.consumer.model.TProductionDetail;
 
 public abstract class ConsumerLoop implements Runnable {
 	static final Logger logger = LoggerFactory.getLogger(ConsumerLoop.class);

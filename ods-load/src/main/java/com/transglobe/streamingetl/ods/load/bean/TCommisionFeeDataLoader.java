@@ -176,6 +176,7 @@ public class TCommisionFeeDataLoader extends DataLoader {
 		+ ",EXCHANGE_DATE"
 		+ ",EXCHANGE_RATE"
 		+ ",HEAD_AGENT_ID"
+		+ ",ORA_ROWSCN"
 		+ ",ROWID"
 		+ " from " + this.sourceTableName
 		+ " a where ? <= a.FEE_ID and a.FEE_ID < ?";
@@ -408,8 +409,8 @@ Console cnsl = null;
 					sinkPstmt.setString(88, rs.getString("EXCHANGE_RATE"));
 					sinkPstmt.setBigDecimal(89, rs.getBigDecimal("HEAD_AGENT_ID"));
 
-					sinkPstmt.setLong(90, loadBean.currentScn);				// new column				// new column
-					sinkPstmt.setLong(91, loadBean.currentScn);				// new column
+					sinkPstmt.setLong(90, rs.getLong("ORA_ROWSCN"));				// new column				// new column
+					sinkPstmt.setLong(91, rs.getLong("ORA_ROWSCN"));				// new column
 					sinkPstmt.setString(92,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();

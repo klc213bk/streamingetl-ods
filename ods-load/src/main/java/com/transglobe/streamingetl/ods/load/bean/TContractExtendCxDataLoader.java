@@ -97,6 +97,7 @@ public class TContractExtendCxDataLoader extends DataLoader {
 		+ ",OPER_TYPE"
 		+ ",LOG_TYPE"
 		+ ",CHANGE_SEQ"
+		+ ",ORA_ROWSCN"
 		+ ",ROWID"
 		+ " from " + this.sourceTableName
 		+ " a where ? <= a.LOG_ID and a.LOG_ID < ?";
@@ -166,8 +167,8 @@ public class TContractExtendCxDataLoader extends DataLoader {
 					sinkPstmt.setBigDecimal(9, rs.getBigDecimal("CHANGE_SEQ"));
 					sinkPstmt.setDate(10, dataDate);
 					//TBL_UPD_TIME
-					sinkPstmt.setLong(11, loadBean.currentScn);				// new column				// new column
-					sinkPstmt.setLong(12, loadBean.currentScn);				// new column
+					sinkPstmt.setLong(11, rs.getLong("ORA_ROWSCN"));				// new column				// new column
+					sinkPstmt.setLong(12, rs.getLong("ORA_ROWSCN"));				// new column
 					sinkPstmt.setString(13,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();

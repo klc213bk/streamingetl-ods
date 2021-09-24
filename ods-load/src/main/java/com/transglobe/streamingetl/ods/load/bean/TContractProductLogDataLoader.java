@@ -299,6 +299,7 @@ public class TContractProductLogDataLoader extends DataLoader {
 		+ ",ORIGIN_PRODUCT_VERSION_ID"
 		+ ",TRANSFORM_DATE"
 		+ ",HEALTH_INSURANCE_VERSION"
+		+ ",ORA_ROWSCN"
 		+ ",ROWID"
 		+ " from " + this.sourceTableName
 		+ " a where ? <= a.LOG_ID and a.LOG_ID < ?";
@@ -743,8 +744,8 @@ public class TContractProductLogDataLoader extends DataLoader {
 					sinkPstmt.setDate(193, dataDate);
 					
 					//TBL_UPD_TIME
-					sinkPstmt.setLong(194, loadBean.currentScn);				// new column				// new column
-					sinkPstmt.setLong(195, loadBean.currentScn);				// new column
+					sinkPstmt.setLong(194, rs.getLong("ORA_ROWSCN"));				// new column				// new column
+					sinkPstmt.setLong(195, rs.getLong("ORA_ROWSCN"));				// new column
 					sinkPstmt.setString(196,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();

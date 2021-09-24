@@ -51,70 +51,77 @@ public class LoadDataApp {
 			String configFile = StringUtils.isBlank(profileActive)? CONFIG_FILE_NAME : profileActive + "/" + CONFIG_FILE_NAME;
 			Config config = Config.getConfig(configFile);
 			Date dataDate = Date.valueOf(dataDateStr);
+			String sinkTableName = null;
+			boolean updateStatistics = false;
 			if (StringUtils.equals(config.sourceTableTCommisionFee, tableName)) {
 				dataloader = new TCommisionFeeDataLoader(config, dataDate);
-				dataloader.run();
-				
+				sinkTableName = config.sinkTableKCommisionFee;
 			} else if (StringUtils.equals(config.sourceTableTContractExtendCx, tableName)) {
 				dataloader = new TContractExtendCxDataLoader(config, dataDate);
-				dataloader.run();
-				
+				sinkTableName = config.sinkTableKContractExtendCx;
 			} else if (StringUtils.equals(config.sourceTableTContractExtendLog, tableName)) {
 				dataloader = new TContractExtendLogDataLoader(config, dataDate);
-				dataloader.run();
-				
-				// update statistics
-				logger.info(">>>>>gatherTableStats");
-				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKContractExtendLog);
+				sinkTableName = config.sinkTableKContractExtendLog;
 				
 			}  else if (StringUtils.equals(config.sourceTableTContractProductLog, tableName)) {
 				dataloader = new TContractProductLogDataLoader(config, dataDate);
-				dataloader.run();
-				
-				// update statistics
-				logger.info(">>>>>gatherTableStats");
-				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKContractProductLog);
+				sinkTableName = config.sinkTableKContractProductLog;
+				updateStatistics = true;
 				
 			} else if (StringUtils.equals(config.sourceTableTImage, tableName)) {
 				dataloader = new TImageDataLoader(config, dataDate);
-				dataloader.run();
-				
-				// update statistics
-				logger.info(">>>>>gatherTableStats");
-				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKImage);
-				
+				sinkTableName = config.sinkTableKImage;
+				updateStatistics = true;
 			} else if (StringUtils.equals(config.sourceTableJbpmVariableinstance, tableName)) {
 				dataloader = new JbpmVariableinstanceDataLoader(config, dataDate);
-				dataloader.run();
-				
-				// update statistics
-				logger.info(">>>>>gatherTableStats");
-				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKJbpmVariableinstance);
-				
+				sinkTableName = config.sinkTableKJbpmVariableinstance;
+				updateStatistics = true;
 			} else if (StringUtils.equals(config.sourceTableTPolicyChange, tableName)) {
 				dataloader = new TPolicyChangeDataLoader(config, dataDate);
-				dataloader.run();
-				
+				sinkTableName = config.sinkTableKPolicyChange;
 			} else if (StringUtils.equals(config.sourceTableTPolicyPrintJob, tableName)) {
 				dataloader = new TPolicyPrintJobDataLoader(config, dataDate);
-				dataloader.run();
-				
-				// update statistics
-				logger.info(">>>>>gatherTableStats");
-				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKPolicyPrintJob);
+				sinkTableName = config.sinkTableKPolicyPrintJob;
+				updateStatistics = true;
 			} else if (StringUtils.equals(config.sourceTableTProductCommision, tableName)) {
 				dataloader = new TProductCommisionDataLoader(config, dataDate);
-				dataloader.run();
-				
+				sinkTableName = config.sinkTableKProductCommision;
 			} else if (StringUtils.equals(config.sourceTableTProductionDetail, tableName)) {
 				dataloader = new TProductionDetailDataLoader(config, dataDate);
-				dataloader.run();
-				
-				// update statistics
-				logger.info(">>>>>gatherTableStats");
-				dataloader.gatherTableStats(config.sinkTableSchema, config.sinkTableKProductionDetail);
+				sinkTableName = config.sinkTableKProductionDetail;
+				updateStatistics = true;
 			} else {
 				throw new Exception("No table name match:" + tableName);
+			}
+			
+			logger.info(">>>  Start to drop sink table=");
+			dataloader.dropSinkTable();
+			
+			logger.info(">>>  Start to create sink table");
+			dataloader.createSinkTable();
+			
+			logger.info(">>>  Start to load data");
+			dataloader.loadData();
+			
+			logger.info(">>>  Start: check source and sink data count");
+			long sourceCnt = dataloader.getSourceRecordsCount();
+			long sinkCnt = dataloader.getSinkRecordsCount();
+			if (sourceCnt == sinkCnt) {
+				logger.info(">>>  sourceCnt={} equals to sinkCnt={}", sourceCnt, sinkCnt);
+			} else {
+				throw new Exception("sourceCnt("+ sourceCnt + ") does not equal to sinkCnt(" + sinkCnt + ")");
+			}
+			
+			logger.info(">>>  Start: create sink table Index");	
+			dataloader.createSinkTableIndex();
+			
+			if (updateStatistics) {
+				// update statistics
+				logger.info(">>>>>DO gatherTableStats");
+				dataloader.gatherTableStats(config.sinkTableSchema, sinkTableName);
+				
+			} else {
+				logger.info(">>>>>NO gatherTableStats");
 			}
 
 			System.exit(0);

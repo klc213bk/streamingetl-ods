@@ -5,12 +5,10 @@ import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * properties based on ODS.O_PRODUCTION_DETAIL
  * Json Property properties based on EBAO.T_PRODUCTION_DETAIL
- * @author steven
- *
+ * Using Long for DATE type.
  */
-public class ProductionDetail {
+public class TProductionDetail {
 
 	@JsonProperty("DETAIL_ID")
 	private BigDecimal detailId;
@@ -152,10 +150,6 @@ public class ProductionDetail {
 	
 	@JsonProperty("ACCEPT_ID")	
 	private BigDecimal acceptId;
-
-	private Long dataDate; 
-	
-	private Long tblUpdTime;
     
 	public BigDecimal getDetailId() {
 		return detailId;
@@ -532,23 +526,5 @@ public class ProductionDetail {
 	public void setAcceptId(BigDecimal acceptId) {
 		this.acceptId = acceptId;
 	}
-
-	public Long getDataDate() {
-		return dataDate;
-	}
-
-	public void setDataDate(Long dataDate) {
-		this.dataDate = dataDate;
-	}
-
-	public Long getTblUpdTime() {
-		return tblUpdTime;
-	}
-
-	public void setTblUpdTime(Long tblUpdTime) {
-		this.tblUpdTime = tblUpdTime;
-	}
-	
-	
 	
 }

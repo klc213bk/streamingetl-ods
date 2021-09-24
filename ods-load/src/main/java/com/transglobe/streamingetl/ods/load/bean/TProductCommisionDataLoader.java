@@ -222,6 +222,7 @@ public class TProductCommisionDataLoader extends DataLoader {
 				+ ",CHECK_ENTER_TIME"
 				+ ",SERVICE_ID"
 				+ ",ORDER_ID" 
+				+ ",ORA_ROWSCN"
 				+ ",ROWID"
 				+ " from " + this.sourceTableName
 				+ " a where ? <= a.ITEM_ID and a.ITEM_ID < ?";
@@ -542,8 +543,8 @@ public class TProductCommisionDataLoader extends DataLoader {
 					sinkPstmt.setString(131, rs.getString("CHANNEL_CODE_"));
 					sinkPstmt.setString(132, rs.getString("INITIAL_TYPE_"));
 
-					sinkPstmt.setLong(133, loadBean.currentScn);		// new column
-					sinkPstmt.setLong(134, loadBean.currentScn);		// new column
+					sinkPstmt.setLong(133, rs.getLong("ORA_ROWSCN"));		// new column
+					sinkPstmt.setLong(134, rs.getLong("ORA_ROWSCN"));		// new column
 					sinkPstmt.setString(135,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();

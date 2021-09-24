@@ -130,6 +130,7 @@ public class TImageDataLoader extends DataLoader {
 		+ ",REAL_WIDTH"
 		+ ",SIG_SEQ_NUMBER"
 		+ ",SCAN_ORDER"
+		+ ",ORA_ROWSCN"
 		+ ",ROWID"
 		+ " from " + this.sourceTableName
 		+ " a where ? <= a.IMAGE_ID and a.IMAGE_ID < ?";
@@ -376,8 +377,8 @@ Console cnsl = null;
 					
 					// db current_time for tbl_upd_time 
 					
-					sinkPstmt.setLong(45, loadBean.currentScn);				// new column				// new column
-					sinkPstmt.setLong(46, loadBean.currentScn);				// new column
+					sinkPstmt.setLong(45, rs.getLong("ORA_ROWSCN"));				// new column				// new column
+					sinkPstmt.setLong(46, rs.getLong("ORA_ROWSCN"));				// new column
 					sinkPstmt.setString(47,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();

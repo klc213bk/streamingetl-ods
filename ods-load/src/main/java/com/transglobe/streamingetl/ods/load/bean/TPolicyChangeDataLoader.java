@@ -129,6 +129,7 @@ public class TPolicyChangeDataLoader extends DataLoader {
 				+ ",TASK_DUE_DATE"
 				+ ",ALTERATION_INFO_ID"
 				+ ",POLICY_CHG_ORDER_SEQ" 
+				+ ",ORA_ROWSCN"
 				+ ",ROWID"
 				+ " from " + this.sourceTableName
 				+ " a where ? <= a.POLICY_CHG_ID and a.POLICY_CHG_ID < ?";
@@ -270,8 +271,8 @@ public class TPolicyChangeDataLoader extends DataLoader {
 					
 					// db current_time for tbl_upd_time 
 					
-					sinkPstmt.setLong(45, loadBean.currentScn);				// new column
-					sinkPstmt.setLong(46, loadBean.currentScn);				// new column
+					sinkPstmt.setLong(45, rs.getLong("ORA_ROWSCN"));				// new column
+					sinkPstmt.setLong(46, rs.getLong("ORA_ROWSCN"));				// new column
 					sinkPstmt.setString(47,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();

@@ -11,6 +11,5 @@ public class LoadBean {
 	public long endSeq;
 	public long span;
 	public long count = 0L;
-	public Long currentScn;
 
 }

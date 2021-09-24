@@ -135,6 +135,7 @@ public class TProductionDetailDataLoader extends DataLoader {
 		+ ",ORDER_ID"
 		+ ",ASSIGN_RATE"
 		+ ",ACCEPT_ID"
+		+ ",ORA_ROWSCN"
 		+ ",ROWID"
 		+ " from " + this.sourceTableName
 		+ " a where ? <= a.DETAIL_ID and a.DETAIL_ID < ?";
@@ -285,8 +286,8 @@ Console cnsl = null;
 					
 					// db current_time for tbl_upd_time 
 					
-					sinkPstmt.setLong(48, loadBean.currentScn);				// new column
-					sinkPstmt.setLong(49, loadBean.currentScn);				// new column
+					sinkPstmt.setLong(48, rs.getLong("ORA_ROWSCN"));				// new column
+					sinkPstmt.setLong(49, rs.getLong("ORA_ROWSCN"));				// new column
 					sinkPstmt.setString(50,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();

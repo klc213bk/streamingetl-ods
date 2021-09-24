@@ -103,6 +103,8 @@ public class JbpmVariableinstanceDataLoader extends DataLoader {
 		+ ",STRINGIDCLASS_"
 		+ ",STRINGVALUE_"
 		+ ",TASKINSTANCE_"
+		+ ",ORA_ROWSCN"
+		+ ",ROWID"
 		+ " from " + this.sourceTableName
 		+ " a where ? <= a.ID_ and a.ID_ < ?";
 	}
@@ -131,7 +133,7 @@ public class JbpmVariableinstanceDataLoader extends DataLoader {
 				+ ",SCN"		// new column
 				+ ",COMMIT_SCN"	// new column
 				+ ",ROW_ID)"	// new column
-				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,NULL)";
+				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,?)";
 			
 	}
 
@@ -188,8 +190,9 @@ Console cnsl = null;
 					
 					// db current_time for tbl_upd_time 
 					
-					sinkPstmt.setLong(18, loadBean.currentScn);				// new column
-					sinkPstmt.setLong(19, loadBean.currentScn);				// new column// new column
+					sinkPstmt.setLong(18, rs.getLong("ORA_ROWSCN"));				// new column
+					sinkPstmt.setLong(19, rs.getLong("ORA_ROWSCN"));				// new column// new column
+					sinkPstmt.setString(20, rs.getString("ROWID"));				// new column// new column
 					
 					sinkPstmt.addBatch();
 

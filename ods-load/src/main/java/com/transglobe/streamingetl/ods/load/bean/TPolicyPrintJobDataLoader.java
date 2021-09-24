@@ -122,6 +122,7 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 				+ ",LANG_ID"
 				+ ",CHANGE_ID"
 				+ ",PRINT_COMP_INDI" 
+				+ ",ORA_ROWSCN"
 				+ ",ROWID"
 				+ " from " + this.sourceTableName
 				+ " a where ? <= a.JOB_ID and a.JOB_ID < ?";
@@ -327,8 +328,8 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 					
 					// db current_time for tbl_upd_time 
 					
-					sinkPstmt.setLong(38, loadBean.currentScn);				// new column
-					sinkPstmt.setLong(39, loadBean.currentScn);				// new column
+					sinkPstmt.setLong(38, rs.getLong("ORA_ROWSCN"));				// new column
+					sinkPstmt.setLong(39, rs.getLong("ORA_ROWSCN"));				// new column
 					sinkPstmt.setString(40,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();

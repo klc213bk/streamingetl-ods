@@ -119,6 +119,7 @@ public class TContractExtendLogDataLoader extends DataLoader {
 		+ ",BUCKET_FILLING_DUE_DATE"
 		+ ",ILP_DUE_DATE"
 		+ ",WAIVER_SOURCE"
+		+ ",ORA_ROWSCN"
 		+ ",ROWID"
 		+ " from " + this.sourceTableName
 		+ " a where ? <= a.LOG_ID and a.LOG_ID < ?";
@@ -231,8 +232,8 @@ public class TContractExtendLogDataLoader extends DataLoader {
 					sinkPstmt.setDate(31, dataDate);	
 						
 					//TBL_UPD_TIME
-					sinkPstmt.setLong(32, loadBean.currentScn);				// new column				// new column
-					sinkPstmt.setLong(33, loadBean.currentScn);				// new column
+					sinkPstmt.setLong(32, rs.getLong("ORA_ROWSCN"));				// new column				// new column
+					sinkPstmt.setLong(33, rs.getLong("ORA_ROWSCN"));				// new column
 					sinkPstmt.setString(34,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();
