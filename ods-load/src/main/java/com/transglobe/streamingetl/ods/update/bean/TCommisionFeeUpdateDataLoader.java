@@ -1,4 +1,4 @@
-package com.transglobe.streamingetl.ods.load.bean;
+package com.transglobe.streamingetl.ods.update.bean;
 
 import java.io.Console;
 import java.math.BigDecimal;
@@ -16,50 +16,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.transglobe.streamingetl.ods.load.Config;
+import com.transglobe.streamingetl.ods.load.bean.LoadBean;
 
-public class TCommisionFeeDataLoader extends DataLoader {
+public class TCommisionFeeUpdateDataLoader extends UpdateDataLoader {
 
-	private static final Logger logger = LoggerFactory.getLogger(TCommisionFeeDataLoader.class);
+	private static final Logger logger = LoggerFactory.getLogger(TCommisionFeeUpdateDataLoader.class);
 
+	private static final String UPDATE_TABLE_NAME = "T_COMMISION_FEE_UPDATE";
+	
+	private static final String UPDATE_TABLE_CREATE_FILE_NAME = "update/createtable-T_COMMISION_FEE_UPDATE.sql";
+	
 	private String sourceTableName ;
 
-	private String sinkTableName;
+	private String fromUpdateTime;
+	
+	private String toUpdateTime;
+	
+	public TCommisionFeeUpdateDataLoader(Config config, String fromUpdateTime, String toUpdateTime) throws Exception {
 
-	private String sinkTableCreateFile;
-
-	private String sinkTableIndexesFile;
-
-	public TCommisionFeeDataLoader(Config config, Date dataDate) throws Exception {
-
-		super(DataLoader.DEFAULT_THREADS, DataLoader.DEFAULT_BATCH_COMMIT_SIZE, config, dataDate);
+		super(UpdateDataLoader.DEFAULT_THREADS, UpdateDataLoader.DEFAULT_BATCH_COMMIT_SIZE, config, fromUpdateTime, toUpdateTime);
 
 		this.sourceTableName = config.sourceTableTCommisionFee;
-
-		this.sinkTableName = config.sinkTableKCommisionFee;
-
-		this.sinkTableCreateFile = config.sinkTableCreateFileKCommisionFee;
-
-		this.sinkTableIndexesFile = config.sinkTableIndexesFileKCommisionFee;
+		this.fromUpdateTime = fromUpdateTime;
+		this.toUpdateTime = toUpdateTime;
 	}
 
 	@Override
 	public String getSourceTableName() {
 		return this.sourceTableName;
-	}
-	
-	@Override
-	protected String getSinkTableName() {
-		return this.sinkTableName;
-	}
-
-	@Override
-	protected String getSinkTableCreateFileName() {
-		return sinkTableCreateFile;
-	}
-
-	@Override
-	protected String getSinkTableIndexesCreateFileName() {
-		return sinkTableIndexesFile;
 	}
 
 	@Override
@@ -171,12 +155,12 @@ public class TCommisionFeeDataLoader extends DataLoader {
 		+ ",ORA_ROWSCN"
 		+ ",ROWID"
 		+ " from " + this.sourceTableName
-		+ " a where ? <= a.FEE_ID and a.FEE_ID < ?";
+		+ " a where ? <= a.FEE_ID and a.FEE_ID < ? and to_date(?, 'YYYY-MM-DD') <= UPDATE_TIME and UPDATE_TIME < to_date(?, 'YYYY-MM-DD')";
 	}
 
 	@Override
 	protected String getInsertSql() {
-		return "insert into " + this.sinkTableName
+		return "insert into " + UPDATE_TABLE_NAME
 				+ " (FEE_ID"
 				+ ",SOURCE_ID"
 				+ ",SOURCE_TABLE"
@@ -256,8 +240,6 @@ public class TCommisionFeeDataLoader extends DataLoader {
 				+ ",TRIGGER_CODE"
 				+ ",PREM_YEAR"
 				+ ",COMM_STATUS"
-				+ ",DATA_DATE"		// ods add column
-				+ ",TBL_UPD_TIME"	// ods add column
 				+ ",INSERTED_BY"
 				+ ",UPDATED_BY"
 				+ ",INSERT_TIME"
@@ -268,13 +250,12 @@ public class TCommisionFeeDataLoader extends DataLoader {
 				+ ",EXCHANGE_RATE"
 				+ ",HEAD_AGENT_ID"
 				+ ",SCN"		// new column
-				+ ",COMMIT_SCN"	// new column
 				+ ",ROW_ID)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",CURRENT_DATE,?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ ",?,?,?,?,?,?,?,?,?,?)";
 			
 	}
 
@@ -288,16 +269,24 @@ Console cnsl = null;
 				Connection sinkConn = sinkConnectionPool.getConnection();
 				final PreparedStatement sourcePstmt = sourceConn.prepareStatement(getSelectSql());
 				final PreparedStatement sinkPstmt = 
-						sinkConn.prepareStatement(getInsertSql());  
+						sinkConn.prepareStatement(getInsertSql());
 				)
 		{
+//			cnsl = System.console();
+
+			
+//				cnsl.printf(" selectSql = %s, startSeq=%d, endSeq=%d, fromUpdateTime=%s, endUpdateTime=%s", 
+//						getSelectSql(), loadBean.startSeq, loadBean.endSeq, fromUpdateTime, toUpdateTime);
+//			
+			
 			long t0 = System.currentTimeMillis();
 			sourceConn.setAutoCommit(false);
 			sinkConn.setAutoCommit(false); 
 
 			sourcePstmt.setLong(1, loadBean.startSeq);
 			sourcePstmt.setLong(2, loadBean.endSeq);
-
+			sourcePstmt.setString(3, fromUpdateTime);
+			sourcePstmt.setString(4, toUpdateTime);
 			try (final ResultSet rs =
 					sourcePstmt.executeQuery())
 			{
@@ -387,21 +376,18 @@ Console cnsl = null;
 					sinkPstmt.setString(77, rs.getString("TRIGGER_CODE"));
 					sinkPstmt.setString(78, rs.getString("PREM_YEAR"));
 					sinkPstmt.setBigDecimal(79, rs.getBigDecimal("COMM_STATUS"));
-					sinkPstmt.setDate(80, dataDate);
-					//TBL_UPD_TIME
-					sinkPstmt.setBigDecimal(81, rs.getBigDecimal("INSERTED_BY"));
-					sinkPstmt.setBigDecimal(82, rs.getBigDecimal("UPDATED_BY"));
-					sinkPstmt.setDate(83, rs.getDate("INSERT_TIME"));
-					sinkPstmt.setDate(84, rs.getDate("UPDATE_TIME"));
-					sinkPstmt.setDate(85, rs.getDate("INSERT_TIMESTAMP"));
-					sinkPstmt.setDate(86, rs.getDate("UPDATE_TIMESTAMP"));
-					sinkPstmt.setDate(87, rs.getDate("EXCHANGE_DATE"));
-					sinkPstmt.setString(88, rs.getString("EXCHANGE_RATE"));
-					sinkPstmt.setBigDecimal(89, rs.getBigDecimal("HEAD_AGENT_ID"));
+					sinkPstmt.setBigDecimal(80, rs.getBigDecimal("INSERTED_BY"));
+					sinkPstmt.setBigDecimal(81, rs.getBigDecimal("UPDATED_BY"));
+					sinkPstmt.setDate(82, rs.getDate("INSERT_TIME"));
+					sinkPstmt.setDate(83, rs.getDate("UPDATE_TIME"));
+					sinkPstmt.setDate(84, rs.getDate("INSERT_TIMESTAMP"));
+					sinkPstmt.setDate(85, rs.getDate("UPDATE_TIMESTAMP"));
+					sinkPstmt.setDate(86, rs.getDate("EXCHANGE_DATE"));
+					sinkPstmt.setString(87, rs.getString("EXCHANGE_RATE"));
+					sinkPstmt.setBigDecimal(88, rs.getBigDecimal("HEAD_AGENT_ID"));
 
-					sinkPstmt.setLong(90, rs.getLong("ORA_ROWSCN"));				// new column				// new column
-					sinkPstmt.setLong(91, rs.getLong("ORA_ROWSCN"));				// new column
-					sinkPstmt.setString(92,  rs.getString("ROWID"));		// new column
+					sinkPstmt.setLong(89, rs.getLong("ORA_ROWSCN"));		// new column
+					sinkPstmt.setString(90,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();
 
@@ -421,9 +407,8 @@ Console cnsl = null;
 					loadBean.count = count;
 					
 					cnsl = System.console();
-
 					cnsl.printf("   >>>insert into %s count=%d, loadbeanseq=%d, loadBeanSize=%d, startSeq=%d, endSeq=%d, span=%d\n", 
-							sinkTableName, loadBean.count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, span);
+							UPDATE_TABLE_NAME, loadBean.count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, span);
 					cnsl.flush();
 				}
 			} catch (Exception e) {
@@ -432,6 +417,16 @@ Console cnsl = null;
 			}
 			
 		} 
+	}
+
+	@Override
+	protected String getUpdateTableCreateFileName() {
+		return UPDATE_TABLE_CREATE_FILE_NAME;
+	}
+
+	@Override
+	protected String getUpdateTableName() {
+		return UPDATE_TABLE_NAME;
 	}	
 
 }

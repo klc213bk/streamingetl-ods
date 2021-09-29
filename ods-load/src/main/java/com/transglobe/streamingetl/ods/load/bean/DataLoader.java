@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.transglobe.streamingetl.common.bean.CommonConstants;
 import com.transglobe.streamingetl.common.util.OracleUtils;
 import com.transglobe.streamingetl.common.util.StreamingEtlUtils;
+import com.transglobe.streamingetl.ods.load.Config;
 
 public abstract class DataLoader {
 	private static final Logger logger = LoggerFactory.getLogger(DataLoader.class);
@@ -37,7 +38,6 @@ public abstract class DataLoader {
 	
 	protected BasicDataSource sourceConnectionPool;
 	protected BasicDataSource sinkConnectionPool;
-	protected BasicDataSource logminerConnectionPool;
 
 	protected Config config;
 
@@ -78,14 +78,7 @@ public abstract class DataLoader {
 		sinkConnectionPool.setPassword(config.sinkDbPassword);
 		sinkConnectionPool.setDriverClassName(config.sinkDbDriver);
 		sinkConnectionPool.setMaxTotal(threads);
-
-		logminerConnectionPool = new BasicDataSource();
-		logminerConnectionPool.setUrl(config.logminerDbUrl);
-		logminerConnectionPool.setUsername(config.logminerDbUsername);
-		logminerConnectionPool.setPassword(config.logminerDbPassword);
-		logminerConnectionPool.setDriverClassName(config.logminerDbDriver);
-		logminerConnectionPool.setMaxTotal(threads);
-
+		
 		this.dataDate = dataDate;
 
 	}
@@ -94,10 +87,6 @@ public abstract class DataLoader {
 	}
 	public Connection getSinkConnection() throws SQLException {
 		return sinkConnectionPool.getConnection();
-	}
-
-	public Connection getLogminerConnection() throws SQLException {
-		return logminerConnectionPool.getConnection();
 	}
 	
 	public void dropSinkTable() throws Exception {
@@ -177,7 +166,6 @@ public abstract class DataLoader {
 			List<LoadBean> loadBeanList = new ArrayList<>();
 			long recordCount = 0L;
 			long endIndex = 0L;
-//			while (startIndex <= maxId) {
 			do {
 				endIndex = startIndex + stepSize;
 				pstmt.setLong(1, startIndex);
@@ -300,7 +288,11 @@ public abstract class DataLoader {
 			if (rs != null) rs.close();
 			if (pstmt != null) pstmt.close();
 			if (sourceConn != null) sourceConn.close();
-		}
+		}//		try {
+//		if (logminerConnectionPool != null) logminerConnectionPool.close();
+//	} catch (Exception e) {
+//		logger.error("message={}, stack trace={}", e.getMessage(), ExceptionUtils.getStackTrace(e));
+//	}
 	}
 	public long getSinkRecordsCount() throws SQLException {
 		String sinkTableName = getSinkTableName();
@@ -333,7 +325,7 @@ public abstract class DataLoader {
 	}
 	private void loadData(LoadBean loadBean) throws Exception {
 
-		transferData(loadBean, sourceConnectionPool, sinkConnectionPool, logminerConnectionPool);
+		transferData(loadBean, sourceConnectionPool, sinkConnectionPool);
 
 	}
 	public void close() {
@@ -344,11 +336,6 @@ public abstract class DataLoader {
 		}
 		try {
 			if (sinkConnectionPool != null) sinkConnectionPool.close();
-		} catch (Exception e) {
-			logger.error("message={}, stack trace={}", e.getMessage(), ExceptionUtils.getStackTrace(e));
-		}
-		try {
-			if (logminerConnectionPool != null) logminerConnectionPool.close();
 		} catch (Exception e) {
 			logger.error("message={}, stack trace={}", e.getMessage(), ExceptionUtils.getStackTrace(e));
 		}
@@ -409,11 +396,9 @@ public abstract class DataLoader {
 			if (pstmt != null) pstmt.close();
 			if (sourceConn != null) sourceConn.close();
 		}
-
 	}
 
 	public abstract String getSourceTableName();
-	public abstract String getStreamingEtlName();
 	abstract protected String getSinkTableName();
 	abstract protected String getSinkTableCreateFileName();
 	abstract protected String getSinkTableIndexesCreateFileName();
@@ -424,6 +409,5 @@ public abstract class DataLoader {
 	abstract protected String getInsertSql();
 	abstract protected void transferData(LoadBean loadBean, 
 			BasicDataSource sourceConnectionPool
-			, BasicDataSource sinkConnectionPool
-			, BasicDataSource logminerConnectionPool) throws Exception;
+			, BasicDataSource sinkConnectionPool) throws Exception;
 }

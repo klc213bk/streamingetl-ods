@@ -14,6 +14,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.transglobe.streamingetl.ods.load.Config;
 
 public class TPolicyPrintJobDataLoader extends DataLoader {
 	private static final Logger logger = LoggerFactory.getLogger(TPolicyPrintJobDataLoader.class);
@@ -21,8 +22,6 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 	private String sourceTableName ;
 	
 	private String sinkTableName;
-	
-	private String streamingEtlName;
 	
 	private String sinkTableCreateFile;
 	
@@ -35,9 +34,7 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 		this.sourceTableName = config.sourceTableTPolicyPrintJob;
 		
 		this.sinkTableName = config.sinkTableKPolicyPrintJob;
-		
-		this.streamingEtlName = config.streamingEtlNameTPolicyPrintJob;
-		
+			
 		this.sinkTableCreateFile = config.sinkTableCreateFileKPolicyPrintJob;
 		
 		this.sinkTableIndexesFile = config.sinkTableIndexesFileKPolicyPrintJob;
@@ -46,11 +43,6 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 	@Override
 	public String getSourceTableName() {
 		return this.sourceTableName;
-	}
-
-	@Override
-	public String getStreamingEtlName() {
-		return this.streamingEtlName;
 	}
 
 	@Override
@@ -178,14 +170,12 @@ public class TPolicyPrintJobDataLoader extends DataLoader {
 	}
 
 	@Override
-	public void transferData(LoadBean loadBean, BasicDataSource sourceConnectionPool, BasicDataSource sinkConnectionPool,
-			BasicDataSource logminerConnectionPool) throws Exception {
+	public void transferData(LoadBean loadBean, BasicDataSource sourceConnectionPool, BasicDataSource sinkConnectionPool) throws Exception {
 		Console cnsl = null;
 		
 		try (
 				Connection sourceConn = sourceConnectionPool.getConnection();
 				Connection sinkConn = sinkConnectionPool.getConnection();
-				Connection minerConn = logminerConnectionPool.getConnection();
 				final PreparedStatement sourcePstmt = sourceConn.prepareStatement(getSelectSql());
 				final PreparedStatement sinkPstmt = 
 						sinkConn.prepareStatement(getInsertSql());  

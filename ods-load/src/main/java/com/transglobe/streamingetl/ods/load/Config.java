@@ -1,4 +1,4 @@
-package com.transglobe.streamingetl.ods.load.bean;
+package com.transglobe.streamingetl.ods.load;
 
 import java.io.InputStream;
 import java.util.Properties;
@@ -63,21 +63,10 @@ public class Config {
 	public String sinkTableIndexesFileKProductCommision;
 	public String sinkTableIndexesFileKProductionDetail;
 	
-	public String logminerDbDriver;
-	public String logminerDbUrl;
-	public String logminerDbUsername;
-	public String logminerDbPassword;
-	
-	public String streamingEtlNameTCommisionFee;
-	public String streamingEtlNameTContractExtendCx;
-	public String streamingEtlNameTContractExtendLog;
-	public String streamingEtlNameTContractProductLog;
-	public String streamingEtlNameTImage;
-	public String streamingEtlNameJbpmVariableinstance;
-	public String streamingEtlNameTPolicyChange;
-	public String streamingEtlNameTPolicyPrintJob;
-	public String streamingEtlNameTProductCommision;
-	public String streamingEtlNameTProductionDetail;
+//	public String logminerDbDriver;
+//	public String logminerDbUrl;
+//	public String logminerDbUsername;
+//	public String logminerDbPassword;
 	
 	public static Config getConfig(String fileName) throws Exception {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -144,22 +133,10 @@ public class Config {
 			config.sinkTableIndexesFileKProductCommision = prop.getProperty("sink.table.indexes.file.k_product_commision");
 			config.sinkTableIndexesFileKProductionDetail = prop.getProperty("sink.table.indexes.file.k_production_detail");
 			
-			config.logminerDbDriver = prop.getProperty("logminer.db.driver");
-			config.logminerDbUrl = prop.getProperty("logminer.db.url");
-			config.logminerDbUsername = prop.getProperty("logminer.db.username");
-			config.logminerDbPassword = prop.getProperty("logminer.db.password");
-			
-			config.streamingEtlNameTCommisionFee = prop.getProperty("streaming.etl.name.t_commission_fee");
-			config.streamingEtlNameTContractExtendCx = prop.getProperty("streaming.etl.name.t_contract_extend_cx");
-			config.streamingEtlNameTContractExtendLog = prop.getProperty("streaming.etl.name.t_contract_extend_log");
-			config.streamingEtlNameTContractProductLog = prop.getProperty("streaming.etl.name.t_contract_product_log");
-			config.streamingEtlNameTImage= prop.getProperty("streaming.etl.name.t_image");
-			config.streamingEtlNameJbpmVariableinstance = prop.getProperty("streaming.etl.name.jbpm_variableinstance");
-			config.streamingEtlNameTPolicyChange = prop.getProperty("streaming.etl.name.t_policy_change");
-			config.streamingEtlNameTPolicyPrintJob = prop.getProperty("streaming.etl.name.t_policy_print_job");
-			config.streamingEtlNameTProductCommision = prop.getProperty("streaming.etl.name.t_product_commision");
-			config.streamingEtlNameTProductionDetail = prop.getProperty("streaming.etl.name.t_production_detail");
-				
+//			config.logminerDbDriver = prop.getProperty("logminer.db.driver");
+//			config.logminerDbUrl = prop.getProperty("logminer.db.url");
+//			config.logminerDbUsername = prop.getProperty("logminer.db.username");
+//			config.logminerDbPassword = prop.getProperty("logminer.db.password");
 					
 			return config;
 		} catch (Exception e) {

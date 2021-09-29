@@ -14,6 +14,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.transglobe.streamingetl.ods.load.Config;
+
 public class JbpmVariableinstanceDataLoader extends DataLoader {
 
 	private static final Logger logger = LoggerFactory.getLogger(JbpmVariableinstanceDataLoader.class);
@@ -21,9 +23,7 @@ public class JbpmVariableinstanceDataLoader extends DataLoader {
 	private String sourceTableName ;
 
 	private String sinkTableName;
-
-	private String streamingEtlName;
-
+	
 	private String sinkTableCreateFile;
 
 	private String sinkTableIndexesFile;
@@ -36,8 +36,6 @@ public class JbpmVariableinstanceDataLoader extends DataLoader {
 
 		this.sinkTableName = config.sinkTableKJbpmVariableinstance;
 
-		this.streamingEtlName = config.streamingEtlNameJbpmVariableinstance;
-
 		this.sinkTableCreateFile = config.sinkTableCreateFileKJbpmVariableinstance;
 
 		this.sinkTableIndexesFile = config.sinkTableIndexesFileKJbpmVariableinstance;
@@ -46,11 +44,6 @@ public class JbpmVariableinstanceDataLoader extends DataLoader {
 	@Override
 	public String getSourceTableName() {
 		return this.sourceTableName;
-	}
-
-	@Override
-	public String getStreamingEtlName() {
-		return this.streamingEtlName;
 	}
 
 	@Override
@@ -139,17 +132,15 @@ public class JbpmVariableinstanceDataLoader extends DataLoader {
 
 	@Override
 	protected void transferData(LoadBean loadBean, BasicDataSource sourceConnectionPool,
-			BasicDataSource sinkConnectionPool, BasicDataSource logminerConnectionPool) throws Exception {
-Console cnsl = null;
+			BasicDataSource sinkConnectionPool) throws Exception {
+		Console cnsl = null;
 		
 		try (
 				Connection sourceConn = sourceConnectionPool.getConnection();
 				Connection sinkConn = sinkConnectionPool.getConnection();
-				Connection minerConn = logminerConnectionPool.getConnection();
 				final PreparedStatement sourcePstmt = sourceConn.prepareStatement(getSelectSql());
 				final PreparedStatement sinkPstmt = 
 						sinkConn.prepareStatement(getInsertSql());
-				final PreparedStatement minerPstmt = minerConn.prepareStatement("SELECT CURRENT_SCN FROM v$database")     
 				)
 		{
 			long t0 = System.currentTimeMillis();
