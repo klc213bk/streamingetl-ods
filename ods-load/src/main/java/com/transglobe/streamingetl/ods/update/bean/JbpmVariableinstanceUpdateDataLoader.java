@@ -1,6 +1,7 @@
-package com.transglobe.streamingetl.ods.load.bean;
+package com.transglobe.streamingetl.ods.update.bean;
 
 import java.io.Console;
+import java.math.BigDecimal;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Date;
@@ -15,50 +16,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.transglobe.streamingetl.ods.load.Config;
+import com.transglobe.streamingetl.ods.load.bean.LoadBean;
 
-public class JbpmVariableinstanceDataLoader extends DataLoader {
+public class JbpmVariableinstanceUpdateDataLoader extends UpdateDataLoader {
 
-	private static final Logger logger = LoggerFactory.getLogger(JbpmVariableinstanceDataLoader.class);
+	private static final Logger logger = LoggerFactory.getLogger(JbpmVariableinstanceUpdateDataLoader.class);
+
+	private static final String UPDATE_TABLE_NAME = "JBPM_VARIABLEINSTANCE_UPDATE";
+
+	private static final String UPDATE_TABLE_CREATE_FILE_NAME = "update/createtable-JBPM_VARIABLEINSTANCE_UPDATE.sql";
 
 	private String sourceTableName ;
 
-	private String sinkTableName;
-	
-	private String sinkTableCreateFile;
+	private String fromUpdateTime;
 
-	private String sinkTableIndexesFile;
+	private String toUpdateTime;
 
-	public JbpmVariableinstanceDataLoader(Config config, Date dataDate) throws Exception {
+	public JbpmVariableinstanceUpdateDataLoader(Config config, String fromUpdateTime, String toUpdateTime) throws Exception {
 
-		super(config, dataDate);
+		super(config, fromUpdateTime, toUpdateTime);
 
 		this.sourceTableName = config.sourceTableJbpmVariableinstance;
-
-		this.sinkTableName = config.sinkTableKJbpmVariableinstance;
-
-		this.sinkTableCreateFile = config.sinkTableCreateFileKJbpmVariableinstance;
-
-		this.sinkTableIndexesFile = config.sinkTableIndexesFileKJbpmVariableinstance;
+		this.fromUpdateTime = fromUpdateTime;
+		this.toUpdateTime = toUpdateTime;
 	}
 
 	@Override
 	public String getSourceTableName() {
 		return this.sourceTableName;
-	}
-
-	@Override
-	protected String getSinkTableName() {
-		return this.sinkTableName;
-	}
-
-	@Override
-	protected String getSinkTableCreateFileName() {
-		return sinkTableCreateFile;
-	}
-
-	@Override
-	protected String getSinkTableIndexesCreateFileName() {
-		return sinkTableIndexesFile;
 	}
 
 	@Override
@@ -78,33 +63,32 @@ public class JbpmVariableinstanceDataLoader extends DataLoader {
 
 	@Override
 	protected String getSelectSql() {
-		// TODO Auto-generated method stub
 		return "select"
-		+ " ID_"
-		+ ",CLASS_"
-		+ ",VERSION_"
-		+ ",NAME_"
-		+ ",CONVERTER_"
-		+ ",TOKEN_"
-		+ ",TOKENVARIABLEMAP_"
-		+ ",PROCESSINSTANCE_"
-		+ ",BYTEARRAYVALUE_"
-		+ ",DATEVALUE_"
-		+ ",DOUBLEVALUE_"
-		+ ",LONGIDCLASS_"
-		+ ",LONGVALUE_"
-		+ ",STRINGIDCLASS_"
-		+ ",STRINGVALUE_"
-		+ ",TASKINSTANCE_"
-		+ ",ORA_ROWSCN"
-		+ ",ROWID"
-		+ " from " + this.sourceTableName
-		+ " a where ? <= a.ID_ and a.ID_ < ?";
+				+ " ID_"
+				+ ",CLASS_"
+				+ ",VERSION_"
+				+ ",NAME_"
+				+ ",CONVERTER_"
+				+ ",TOKEN_"
+				+ ",TOKENVARIABLEMAP_"
+				+ ",PROCESSINSTANCE_"
+				+ ",BYTEARRAYVALUE_"
+				+ ",DATEVALUE_"
+				+ ",DOUBLEVALUE_"
+				+ ",LONGIDCLASS_"
+				+ ",LONGVALUE_"
+				+ ",STRINGIDCLASS_"
+				+ ",STRINGVALUE_"
+				+ ",TASKINSTANCE_"
+				+ ",ORA_ROWSCN"
+				+ ",ROWID"
+				+ " from " + this.sourceTableName
+				+ " a where ? <= a.ID_ and a.ID_ < ? and to_date(?, 'YYYY-MM-DD') <= UPDATE_TIME and UPDATE_TIME < to_date(?, 'YYYY-MM-DD')";
 	}
 
 	@Override
 	protected String getInsertSql() {
-		return "insert into " + this.sinkTableName
+		return "insert into " + UPDATE_TABLE_NAME
 				+ " (ID_"
 				+ ",CLASS_"
 				+ ",VERSION_"
@@ -121,20 +105,17 @@ public class JbpmVariableinstanceDataLoader extends DataLoader {
 				+ ",STRINGIDCLASS_"
 				+ ",STRINGVALUE_"
 				+ ",TASKINSTANCE_"
-				+ ",DATA_DATE"				// ods add column
-				+ ",TBL_UPD_TIME"			// ods add column
 				+ ",SCN"		// new column
-				+ ",COMMIT_SCN"	// new column
 				+ ",ROW_ID)"	// new column
-				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,?)";
-			
+				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
 	}
 
 	@Override
 	protected void transferData(LoadBean loadBean, BasicDataSource sourceConnectionPool,
 			BasicDataSource sinkConnectionPool) throws Exception {
 		Console cnsl = null;
-		
+
 		try (
 				Connection sourceConn = sourceConnectionPool.getConnection();
 				Connection sinkConn = sinkConnectionPool.getConnection();
@@ -143,23 +124,26 @@ public class JbpmVariableinstanceDataLoader extends DataLoader {
 						sinkConn.prepareStatement(getInsertSql());
 				)
 		{
+
 			long t0 = System.currentTimeMillis();
 			sourceConn.setAutoCommit(false);
 			sinkConn.setAutoCommit(false); 
 
 			sourcePstmt.setLong(1, loadBean.startSeq);
 			sourcePstmt.setLong(2, loadBean.endSeq);
-
+			sourcePstmt.setString(3, fromUpdateTime);
+			sourcePstmt.setString(4, toUpdateTime);
 			try (final ResultSet rs =
 					sourcePstmt.executeQuery())
 			{
 				Long count = 0L;
+				Long longValue;
 				while (rs.next())
 				{
 					count++;
 
 					sinkPstmt.clearParameters();
-					
+
 					sinkPstmt.setBigDecimal(1, rs.getBigDecimal("ID_"));
 					sinkPstmt.setString(2, rs.getString("CLASS_"));
 					sinkPstmt.setBigDecimal(3, rs.getBigDecimal("VERSION_"));
@@ -176,14 +160,10 @@ public class JbpmVariableinstanceDataLoader extends DataLoader {
 					sinkPstmt.setString(14, rs.getString("STRINGIDCLASS_"));
 					sinkPstmt.setString(15, rs.getString("STRINGVALUE_"));
 					sinkPstmt.setBigDecimal(16, rs.getBigDecimal("TASKINSTANCE_"));
-					sinkPstmt.setDate(17, dataDate);
 					
-					// db current_time for tbl_upd_time 
-					
-					sinkPstmt.setLong(18, rs.getLong("ORA_ROWSCN"));				// new column
-					sinkPstmt.setLong(19, rs.getLong("ORA_ROWSCN"));				// new column// new column
-					sinkPstmt.setString(20, rs.getString("ROWID"));				// new column// new column
-					
+					sinkPstmt.setLong(17, rs.getLong("ORA_ROWSCN"));				// new column// new column
+					sinkPstmt.setString(18, rs.getString("ROWID"));				// new column// new column
+							
 					sinkPstmt.addBatch();
 
 					if (count % this.batchCommitSize == 0) {
@@ -196,23 +176,38 @@ public class JbpmVariableinstanceDataLoader extends DataLoader {
 				if (count > 0) {
 					sinkPstmt.executeBatch();
 					sinkConn.commit(); 
-					
+
 					long span = System.currentTimeMillis() - t0;
 					loadBean.span = span;
 					loadBean.count = count;
-					
-					cnsl = System.console();
 
+					cnsl = System.console();
 					cnsl.printf("   >>>insert into %s count=%d, loadbeanseq=%d, loadBeanSize=%d, startSeq=%d, endSeq=%d, span=%d\n", 
-							sinkTableName, loadBean.count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, span);
+							UPDATE_TABLE_NAME, loadBean.count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, span);
+					cnsl.flush();
+				} else {
+					long span = System.currentTimeMillis() - t0;
+					cnsl = System.console();
+					cnsl.printf("### %s count=%d, loadbeanseq=%d, startSeq=%d, endSeq=%d, span=%d\n", 
+							UPDATE_TABLE_NAME, loadBean.count, loadBean.seq, loadBean.startSeq, loadBean.endSeq, span);
 					cnsl.flush();
 				}
 			} catch (Exception e) {
 				sinkConn.rollback();
 				throw e;
 			}
-			
+
 		} 
+	}
+
+	@Override
+	protected String getUpdateTableCreateFileName() {
+		return UPDATE_TABLE_CREATE_FILE_NAME;
+	}
+
+	@Override
+	protected String getUpdateTableName() {
+		return UPDATE_TABLE_NAME;
 	}	
 
 }

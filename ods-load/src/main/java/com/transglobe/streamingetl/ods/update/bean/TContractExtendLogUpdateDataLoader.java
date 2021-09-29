@@ -36,7 +36,7 @@ public class TContractExtendLogUpdateDataLoader extends UpdateDataLoader {
 
 		super(config, fromUpdateTime, toUpdateTime);
 
-		this.sourceTableName = config.sourceTableTCommisionFee;
+		this.sourceTableName = config.sourceTableTContractExtendLog;
 		this.fromUpdateTime = fromUpdateTime;
 		this.toUpdateTime = toUpdateTime;
 	}

@@ -36,7 +36,7 @@ public class TContractExtendCxUpdateDataLoader extends UpdateDataLoader {
 
 		super(config, fromUpdateTime, toUpdateTime);
 
-		this.sourceTableName = config.sourceTableTCommisionFee;
+		this.sourceTableName = config.sourceTableTContractExtendCx;
 		this.fromUpdateTime = fromUpdateTime;
 		this.toUpdateTime = toUpdateTime;
 	}

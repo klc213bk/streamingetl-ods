@@ -1,6 +1,7 @@
-package com.transglobe.streamingetl.ods.load.bean;
+package com.transglobe.streamingetl.ods.update.bean;
 
 import java.io.Console;
+import java.math.BigDecimal;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Date;
@@ -15,50 +16,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.transglobe.streamingetl.ods.load.Config;
+import com.transglobe.streamingetl.ods.load.bean.LoadBean;
 
-public class TImageDataLoader extends DataLoader {
+public class TImageUpdateDataLoader extends UpdateDataLoader {
 
-	private static final Logger logger = LoggerFactory.getLogger(TImageDataLoader.class);
+	private static final Logger logger = LoggerFactory.getLogger(TImageUpdateDataLoader.class);
+
+	private static final String UPDATE_TABLE_NAME = "T_IMAGE_UPDATE";
+
+	private static final String UPDATE_TABLE_CREATE_FILE_NAME = "update/createtable-T_IMAGE_UPDATE.sql";
 
 	private String sourceTableName ;
 
-	private String sinkTableName;
+	private String fromUpdateTime;
 
-	private String sinkTableCreateFile;
+	private String toUpdateTime;
 
-	private String sinkTableIndexesFile;
+	public TImageUpdateDataLoader(Config config, String fromUpdateTime, String toUpdateTime) throws Exception {
 
-	public TImageDataLoader(Config config, Date dataDate) throws Exception {
-
-		super(config, dataDate);
+		super(config, fromUpdateTime, toUpdateTime);
 
 		this.sourceTableName = config.sourceTableTImage;
-
-		this.sinkTableName = config.sinkTableKImage;
-
-		this.sinkTableCreateFile = config.sinkTableCreateFileKImage;
-
-		this.sinkTableIndexesFile = config.sinkTableIndexesFileKImage;
+		this.fromUpdateTime = fromUpdateTime;
+		this.toUpdateTime = toUpdateTime;
 	}
 
 	@Override
 	public String getSourceTableName() {
 		return this.sourceTableName;
-	}
-
-	@Override
-	protected String getSinkTableName() {
-		return this.sinkTableName;
-	}
-
-	@Override
-	protected String getSinkTableCreateFileName() {
-		return sinkTableCreateFile;
-	}
-
-	@Override
-	protected String getSinkTableIndexesCreateFileName() {
-		return sinkTableIndexesFile;
 	}
 
 	@Override
@@ -79,58 +64,58 @@ public class TImageDataLoader extends DataLoader {
 	@Override
 	protected String getSelectSql() {
 		return "select"
-		+ " IMAGE_ID"
-		+ ",POLICY_ID"
-		+ ",IMAGE_TYPE_ID"
-		+ ",SEQ_NUMBER"
-		+ ",IMAGE_FORMAT"
-		+ ",IMAGE_DATA"
-		+ ",SCAN_TIME"
-		+ ",EMP_ID"
-		+ ",HEAD_ID"
-		+ ",FILE_CODE"
-		+ ",PROCESS_STATUS"
-		+ ",GROUP_POLICY_ID"
-		+ ",CASE_ID"
-		+ ",CHANGE_ID"
-		+ ",IMAGE_LOCATION"
-		+ ",IMAGE_FILE_NAME"
-		+ ",AUTH_CODE"
-		+ ",ORGAN_ID"
-		+ ",SUB_FILE_CODE"
-		+ ",BUSINESS_ORGAN"
-		+ ",IS_PRIORITY"
-		+ ",ZIP_DATE"
-		+ ",IS_CLEAR"
-		+ ",LIST_ID"
-		+ ",INSERT_TIME"
-		+ ",INSERTED_BY"
-		+ ",UPDATE_TIME"
-		+ ",UPDATED_BY"
-		+ ",INSERT_TIMESTAMP"
-		+ ",UPDATE_TIMESTAMP"
-		+ ",DEPT_ID"
-		+ ",COMPANY_CODE"
-		+ ",PERSONAL_CODE"
-		+ ",BATCH_DEPT_TYPE"
-		+ ",BATCH_DATE"
-		+ ",BATCH_AREA"
-		+ ",BATCH_DOC_TYPE"
-		+ ",BOX_NO"
-		+ ",REMARK"
-		+ ",SIGNATURE"
-		+ ",REAL_WIDTH"
-		+ ",SIG_SEQ_NUMBER"
-		+ ",SCAN_ORDER"
-		+ ",ORA_ROWSCN"
-		+ ",ROWID"
-		+ " from " + this.sourceTableName
-		+ " a where ? <= a.IMAGE_ID and a.IMAGE_ID < ?";
+				+ " IMAGE_ID"
+				+ ",POLICY_ID"
+				+ ",IMAGE_TYPE_ID"
+				+ ",SEQ_NUMBER"
+				+ ",IMAGE_FORMAT"
+				+ ",IMAGE_DATA"
+				+ ",SCAN_TIME"
+				+ ",EMP_ID"
+				+ ",HEAD_ID"
+				+ ",FILE_CODE"
+				+ ",PROCESS_STATUS"
+				+ ",GROUP_POLICY_ID"
+				+ ",CASE_ID"
+				+ ",CHANGE_ID"
+				+ ",IMAGE_LOCATION"
+				+ ",IMAGE_FILE_NAME"
+				+ ",AUTH_CODE"
+				+ ",ORGAN_ID"
+				+ ",SUB_FILE_CODE"
+				+ ",BUSINESS_ORGAN"
+				+ ",IS_PRIORITY"
+				+ ",ZIP_DATE"
+				+ ",IS_CLEAR"
+				+ ",LIST_ID"
+				+ ",INSERT_TIME"
+				+ ",INSERTED_BY"
+				+ ",UPDATE_TIME"
+				+ ",UPDATED_BY"
+				+ ",INSERT_TIMESTAMP"
+				+ ",UPDATE_TIMESTAMP"
+				+ ",DEPT_ID"
+				+ ",COMPANY_CODE"
+				+ ",PERSONAL_CODE"
+				+ ",BATCH_DEPT_TYPE"
+				+ ",BATCH_DATE"
+				+ ",BATCH_AREA"
+				+ ",BATCH_DOC_TYPE"
+				+ ",BOX_NO"
+				+ ",REMARK"
+				+ ",SIGNATURE"
+				+ ",REAL_WIDTH"
+				+ ",SIG_SEQ_NUMBER"
+				+ ",SCAN_ORDER"
+				+ ",ORA_ROWSCN"
+				+ ",ROWID"
+				+ " from " + this.sourceTableName
+				+ " a where ? <= a.IMAGE_ID and a.IMAGE_ID < ? and to_date(?, 'YYYY-MM-DD') <= UPDATE_TIME and UPDATE_TIME < to_date(?, 'YYYY-MM-DD')";
 	}
 
 	@Override
 	protected String getInsertSql() {
-		return "insert into " + this.sinkTableName
+		return "insert into " + UPDATE_TABLE_NAME
 				+ " (IMAGE_ID"
 				+ ",POLICY_ID"
 				+ ",IMAGE_TYPE_ID"
@@ -174,37 +159,36 @@ public class TImageDataLoader extends DataLoader {
 				+ ",REAL_WIDTH"
 				+ ",SIG_SEQ_NUMBER"
 				+ ",SCAN_ORDER"
-				+ ",DATA_DATE"				// ods add column
-				+ ",TBL_UPD_TIME"			// ods add column
 				+ ",SCN"		// new column
-				+ ",COMMIT_SCN"	// new column
 				+ ",ROW_ID)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",?,?,?,?,CURRENT_DATE,?,?,?)";
-			
+				+ ",?,?,?,?,?)";
+
 	}
 
 	@Override
 	protected void transferData(LoadBean loadBean, BasicDataSource sourceConnectionPool,
 			BasicDataSource sinkConnectionPool) throws Exception {
 		Console cnsl = null;
-		
+
 		try (
 				Connection sourceConn = sourceConnectionPool.getConnection();
 				Connection sinkConn = sinkConnectionPool.getConnection();
 				final PreparedStatement sourcePstmt = sourceConn.prepareStatement(getSelectSql());
 				final PreparedStatement sinkPstmt = 
-						sinkConn.prepareStatement(getInsertSql());  
+						sinkConn.prepareStatement(getInsertSql());
 				)
 		{
+
 			long t0 = System.currentTimeMillis();
 			sourceConn.setAutoCommit(false);
 			sinkConn.setAutoCommit(false); 
 
 			sourcePstmt.setLong(1, loadBean.startSeq);
 			sourcePstmt.setLong(2, loadBean.endSeq);
-
+			sourcePstmt.setString(3, fromUpdateTime);
+			sourcePstmt.setString(4, toUpdateTime);
 			try (final ResultSet rs =
 					sourcePstmt.executeQuery())
 			{
@@ -363,14 +347,9 @@ public class TImageDataLoader extends DataLoader {
 						sinkPstmt.setLong(43, longValue);
 					}
 					
-					sinkPstmt.setDate(44, dataDate);
-					
-					// db current_time for tbl_upd_time 
-					
-					sinkPstmt.setLong(45, rs.getLong("ORA_ROWSCN"));				// new column				// new column
-					sinkPstmt.setLong(46, rs.getLong("ORA_ROWSCN"));				// new column
-					sinkPstmt.setString(47,  rs.getString("ROWID"));		// new column
-					
+					sinkPstmt.setLong(44, rs.getLong("ORA_ROWSCN"));		// new column
+					sinkPstmt.setString(45,  rs.getString("ROWID"));		// new column
+										
 					sinkPstmt.addBatch();
 
 					if (count % this.batchCommitSize == 0) {
@@ -383,23 +362,38 @@ public class TImageDataLoader extends DataLoader {
 				if (count > 0) {
 					sinkPstmt.executeBatch();
 					sinkConn.commit(); 
-					
+
 					long span = System.currentTimeMillis() - t0;
 					loadBean.span = span;
 					loadBean.count = count;
-					
-					cnsl = System.console();
 
+					cnsl = System.console();
 					cnsl.printf("   >>>insert into %s count=%d, loadbeanseq=%d, loadBeanSize=%d, startSeq=%d, endSeq=%d, span=%d\n", 
-							sinkTableName, loadBean.count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, span);
+							UPDATE_TABLE_NAME, loadBean.count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, span);
+					cnsl.flush();
+				} else {
+					long span = System.currentTimeMillis() - t0;
+					cnsl = System.console();
+					cnsl.printf("### %s count=%d, loadbeanseq=%d, startSeq=%d, endSeq=%d, span=%d\n", 
+							UPDATE_TABLE_NAME, loadBean.count, loadBean.seq, loadBean.startSeq, loadBean.endSeq, span);
 					cnsl.flush();
 				}
 			} catch (Exception e) {
 				sinkConn.rollback();
 				throw e;
 			}
-			
+
 		} 
+	}
+
+	@Override
+	protected String getUpdateTableCreateFileName() {
+		return UPDATE_TABLE_CREATE_FILE_NAME;
+	}
+
+	@Override
+	protected String getUpdateTableName() {
+		return UPDATE_TABLE_NAME;
 	}	
 
 }
