@@ -1,4 +1,4 @@
-package com.transglobe.streamingetl.ods.load.bean;
+package com.transglobe.streamingetl.ods.update.bean;
 
 import java.io.Console;
 import java.math.BigDecimal;
@@ -16,50 +16,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.transglobe.streamingetl.ods.load.Config;
+import com.transglobe.streamingetl.ods.load.bean.LoadBean;
 
-public class TContractExtendLogDataLoader extends DataLoader {
+public class TContractExtendLogUpdateDataLoader extends UpdateDataLoader {
 
-	private static final Logger logger = LoggerFactory.getLogger(TContractExtendLogDataLoader.class);
+	private static final Logger logger = LoggerFactory.getLogger(TContractExtendLogUpdateDataLoader.class);
+
+	private static final String UPDATE_TABLE_NAME = "T_CONTRACT_EXTEND_LOG_UPDATE";
+
+	private static final String UPDATE_TABLE_CREATE_FILE_NAME = "update/createtable-T_CONTRACT_EXTEND_LOG_UPDATE.sql";
 
 	private String sourceTableName ;
 
-	private String sinkTableName;
+	private String fromUpdateTime;
 
-	private String sinkTableCreateFile;
+	private String toUpdateTime;
 
-	private String sinkTableIndexesFile;
+	public TContractExtendLogUpdateDataLoader(Config config, String fromUpdateTime, String toUpdateTime) throws Exception {
 
-	public TContractExtendLogDataLoader(Config config, Date dataDate) throws Exception {
+		super(config, fromUpdateTime, toUpdateTime);
 
-		super(config, dataDate);
-
-		this.sourceTableName = config.sourceTableTContractExtendLog;
-
-		this.sinkTableName = config.sinkTableKContractExtendLog;
-
-		this.sinkTableCreateFile = config.sinkTableCreateFileKContractExtendLog;
-
-		this.sinkTableIndexesFile = config.sinkTableIndexesFileKContractExtendLog;
+		this.sourceTableName = config.sourceTableTCommisionFee;
+		this.fromUpdateTime = fromUpdateTime;
+		this.toUpdateTime = toUpdateTime;
 	}
 
 	@Override
 	public String getSourceTableName() {
 		return this.sourceTableName;
-	}
-
-	@Override
-	protected String getSinkTableName() {
-		return this.sinkTableName;
-	}
-
-	@Override
-	protected String getSinkTableCreateFileName() {
-		return sinkTableCreateFile;
-	}
-
-	@Override
-	protected String getSinkTableIndexesCreateFileName() {
-		return sinkTableIndexesFile;
 	}
 
 	@Override
@@ -80,46 +64,46 @@ public class TContractExtendLogDataLoader extends DataLoader {
 	@Override
 	protected String getSelectSql() {
 		return "select"
-		+ " CHANGE_ID"
-		+ ",LOG_TYPE"
-		+ ",POLICY_CHG_ID"
-		+ ",ITEM_ID"
-		+ ",DUE_DATE"
-		+ ",POLICY_YEAR"
-		+ ",POLICY_PERIOD"
-		+ ",STRGY_DUE_DATE"
-		+ ",PREM_STATUS"
-		+ ",LOG_ID"
-		+ ",SA_DUE_DATE"
-		+ ",LAST_CMT_FLG"
-		+ ",EMS_VERSION"
-		+ ",INSERTED_BY"
-		+ ",UPDATED_BY"
-		+ ",INSERT_TIME"
-		+ ",UPDATE_TIME"
-		+ ",INSERT_TIMESTAMP"
-		+ ",UPDATE_TIMESTAMP"
-		+ ",POLICY_ID"
-		+ ",BILLING_DATE"
-		+ ",REMINDER_DATE"
-		+ ",INDX_DUE_DATE"
-		+ ",INDX_REJECT"
-		+ ",INSURABILITY_DUE_DATE"
-		+ ",INSURABILITY_REJECT_COUNT"
-		+ ",INSURABILITY_REJECT_REASON"
-		+ ",BILL_TO_DATE"
-		+ ",BUCKET_FILLING_DUE_DATE"
-		+ ",ILP_DUE_DATE"
-		+ ",WAIVER_SOURCE"
-		+ ",ORA_ROWSCN"
-		+ ",ROWID"
-		+ " from " + this.sourceTableName
-		+ " a where ? <= a.LOG_ID and a.LOG_ID < ?";
+				+ " CHANGE_ID"
+				+ ",LOG_TYPE"
+				+ ",POLICY_CHG_ID"
+				+ ",ITEM_ID"
+				+ ",DUE_DATE"
+				+ ",POLICY_YEAR"
+				+ ",POLICY_PERIOD"
+				+ ",STRGY_DUE_DATE"
+				+ ",PREM_STATUS"
+				+ ",LOG_ID"
+				+ ",SA_DUE_DATE"
+				+ ",LAST_CMT_FLG"
+				+ ",EMS_VERSION"
+				+ ",INSERTED_BY"
+				+ ",UPDATED_BY"
+				+ ",INSERT_TIME"
+				+ ",UPDATE_TIME"
+				+ ",INSERT_TIMESTAMP"
+				+ ",UPDATE_TIMESTAMP"
+				+ ",POLICY_ID"
+				+ ",BILLING_DATE"
+				+ ",REMINDER_DATE"
+				+ ",INDX_DUE_DATE"
+				+ ",INDX_REJECT"
+				+ ",INSURABILITY_DUE_DATE"
+				+ ",INSURABILITY_REJECT_COUNT"
+				+ ",INSURABILITY_REJECT_REASON"
+				+ ",BILL_TO_DATE"
+				+ ",BUCKET_FILLING_DUE_DATE"
+				+ ",ILP_DUE_DATE"
+				+ ",WAIVER_SOURCE"
+				+ ",ORA_ROWSCN"
+				+ ",ROWID"
+				+ " from " + this.sourceTableName
+				+ " a where ? <= a.LOG_ID and a.LOG_ID < ? and to_date(?, 'YYYY-MM-DD') <= UPDATE_TIME and UPDATE_TIME < to_date(?, 'YYYY-MM-DD')";
 	}
 
 	@Override
 	protected String getInsertSql() {
-		return "insert into " + this.sinkTableName
+		return "insert into " + UPDATE_TABLE_NAME
 				+ " (CHANGE_ID"
 				+ ",LOG_TYPE"
 				+ ",POLICY_CHG_ID"
@@ -150,13 +134,12 @@ public class TContractExtendLogDataLoader extends DataLoader {
 				+ ",BILL_TO_DATE"
 				+ ",BUCKET_FILLING_DUE_DATE"
 				+ ",ILP_DUE_DATE"
-				+ ",DATA_DATE" 		// ods add column 
-				+ ",TBL_UPD_TIME"	// ods add column
+				+ ",WAIVER_SOURCE"
 				+ ",SCN"		// new column
-				+ ",COMMIT_SCN"	// new column
 				+ ",ROW_ID)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",?,?,?,?,?,?,?,?,?,?,?,CURRENT_DATE,?,?,?)";
+				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
 	}
 
 	@Override
@@ -172,13 +155,15 @@ public class TContractExtendLogDataLoader extends DataLoader {
 						sinkConn.prepareStatement(getInsertSql());
 				)
 		{
+
 			long t0 = System.currentTimeMillis();
 			sourceConn.setAutoCommit(false);
 			sinkConn.setAutoCommit(false); 
 
 			sourcePstmt.setLong(1, loadBean.startSeq);
 			sourcePstmt.setLong(2, loadBean.endSeq);
-
+			sourcePstmt.setString(3, fromUpdateTime);
+			sourcePstmt.setString(4, toUpdateTime);
 			try (final ResultSet rs =
 					sourcePstmt.executeQuery())
 			{
@@ -219,12 +204,10 @@ public class TContractExtendLogDataLoader extends DataLoader {
 					sinkPstmt.setDate(28, rs.getDate("BILL_TO_DATE"));
 					sinkPstmt.setDate(29, rs.getDate("BUCKET_FILLING_DUE_DATE"));
 					sinkPstmt.setDate(30, rs.getDate("ILP_DUE_DATE"));
-					sinkPstmt.setDate(31, dataDate);	
-						
-					//TBL_UPD_TIME
-					sinkPstmt.setLong(32, rs.getLong("ORA_ROWSCN"));				// new column				// new column
-					sinkPstmt.setLong(33, rs.getLong("ORA_ROWSCN"));				// new column
-					sinkPstmt.setString(34,  rs.getString("ROWID"));		// new column
+					sinkPstmt.setBigDecimal(31, rs.getBigDecimal("WAIVER_SOURCE"));
+
+					sinkPstmt.setLong(32, rs.getLong("ORA_ROWSCN"));		// new column
+					sinkPstmt.setString(33,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();
 
@@ -244,9 +227,14 @@ public class TContractExtendLogDataLoader extends DataLoader {
 					loadBean.count = count;
 
 					cnsl = System.console();
-
 					cnsl.printf("   >>>insert into %s count=%d, loadbeanseq=%d, loadBeanSize=%d, startSeq=%d, endSeq=%d, span=%d\n", 
-							sinkTableName, loadBean.count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, span);
+							UPDATE_TABLE_NAME, loadBean.count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, span);
+					cnsl.flush();
+				} else {
+					long span = System.currentTimeMillis() - t0;
+					cnsl = System.console();
+					cnsl.printf("### %s count=%d, loadbeanseq=%d, startSeq=%d, endSeq=%d, span=%d\n", 
+							UPDATE_TABLE_NAME, loadBean.count, loadBean.seq, loadBean.startSeq, loadBean.endSeq, span);
 					cnsl.flush();
 				}
 			} catch (Exception e) {
@@ -255,6 +243,16 @@ public class TContractExtendLogDataLoader extends DataLoader {
 			}
 
 		} 
+	}
+
+	@Override
+	protected String getUpdateTableCreateFileName() {
+		return UPDATE_TABLE_CREATE_FILE_NAME;
+	}
+
+	@Override
+	protected String getUpdateTableName() {
+		return UPDATE_TABLE_NAME;
 	}	
 
 }

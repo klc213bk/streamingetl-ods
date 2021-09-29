@@ -54,6 +54,11 @@ public abstract class DataLoader {
 	public DataLoader() {}
 
 	public DataLoader(
+			Config config
+			, Date dataDate) throws Exception {
+		this(DEFAULT_THREADS, DEFAULT_BATCH_COMMIT_SIZE, config, dataDate);
+	}
+	public DataLoader(
 			int threads
 			, int batchCommitSize
 			, Config config

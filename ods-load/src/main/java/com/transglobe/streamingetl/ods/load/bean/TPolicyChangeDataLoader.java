@@ -29,7 +29,7 @@ public class TPolicyChangeDataLoader extends DataLoader {
 	
 	public TPolicyChangeDataLoader(Config config, Date dataDate) throws Exception {
 		
-		super(DataLoader.DEFAULT_THREADS, DataLoader.DEFAULT_BATCH_COMMIT_SIZE, config, dataDate);
+		super(config, dataDate);
 		
 		this.sourceTableName = config.sourceTableTPolicyChange;
 		

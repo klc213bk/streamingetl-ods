@@ -33,6 +33,13 @@ public abstract class UpdateDataLoader extends DataLoader {
 	public UpdateDataLoader() {}
 
 	public UpdateDataLoader(
+			Config config
+			, String fromUpdateTime
+			, String toUpdateTime) throws Exception {
+		this(DataLoader.DEFAULT_THREADS, DataLoader.DEFAULT_BATCH_COMMIT_SIZE, config, fromUpdateTime, toUpdateTime);
+
+	}
+	public UpdateDataLoader(
 			int threads
 			, int batchCommitSize
 			, Config config

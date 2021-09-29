@@ -22,9 +22,9 @@ public class TCommisionFeeUpdateDataLoader extends UpdateDataLoader {
 
 	private static final Logger logger = LoggerFactory.getLogger(TCommisionFeeUpdateDataLoader.class);
 
-	private static final String UPDATE_TABLE_NAME = "T_COMMISION_FEE_UPDATE";
+	private static final String UPDATE_TABLE_NAME = "T_CONTRACT_EXTEND_CX_UPDATE";
 	
-	private static final String UPDATE_TABLE_CREATE_FILE_NAME = "update/createtable-T_COMMISION_FEE_UPDATE.sql";
+	private static final String UPDATE_TABLE_CREATE_FILE_NAME = "update/createtable-T_CONTRACT_EXTEND_CX_UPDATE.sql";
 	
 	private String sourceTableName ;
 
@@ -34,9 +34,9 @@ public class TCommisionFeeUpdateDataLoader extends UpdateDataLoader {
 	
 	public TCommisionFeeUpdateDataLoader(Config config, String fromUpdateTime, String toUpdateTime) throws Exception {
 
-		super(UpdateDataLoader.DEFAULT_THREADS, UpdateDataLoader.DEFAULT_BATCH_COMMIT_SIZE, config, fromUpdateTime, toUpdateTime);
+		super(config, fromUpdateTime, toUpdateTime);
 
-		this.sourceTableName = config.sourceTableTCommisionFee;
+		this.sourceTableName = config.sourceTableTContractExtendCx;
 		this.fromUpdateTime = fromUpdateTime;
 		this.toUpdateTime = toUpdateTime;
 	}
@@ -409,6 +409,12 @@ Console cnsl = null;
 					cnsl = System.console();
 					cnsl.printf("   >>>insert into %s count=%d, loadbeanseq=%d, loadBeanSize=%d, startSeq=%d, endSeq=%d, span=%d\n", 
 							UPDATE_TABLE_NAME, loadBean.count, loadBean.seq, loadBean.loadBeanSize, loadBean.startSeq, loadBean.endSeq, span);
+					cnsl.flush();
+				} else {
+					long span = System.currentTimeMillis() - t0;
+					cnsl = System.console();
+					cnsl.printf("### %s count=%d, loadbeanseq=%d, startSeq=%d, endSeq=%d, span=%d\n", 
+							UPDATE_TABLE_NAME, loadBean.count, loadBean.seq, loadBean.startSeq, loadBean.endSeq, span);
 					cnsl.flush();
 				}
 			} catch (Exception e) {
