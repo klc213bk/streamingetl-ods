@@ -8,18 +8,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.transglobe.streamingetl.ods.load.Config;
-import com.transglobe.streamingetl.ods.load.bean.DataLoader;
-import com.transglobe.streamingetl.ods.load.bean.JbpmVariableinstanceDataLoader;
-import com.transglobe.streamingetl.ods.load.bean.TCommisionFeeDataLoader;
-import com.transglobe.streamingetl.ods.load.bean.TContractExtendCxDataLoader;
-import com.transglobe.streamingetl.ods.load.bean.TContractExtendLogDataLoader;
-import com.transglobe.streamingetl.ods.load.bean.TContractProductLogDataLoader;
-import com.transglobe.streamingetl.ods.load.bean.TImageDataLoader;
-import com.transglobe.streamingetl.ods.load.bean.TPolicyChangeDataLoader;
-import com.transglobe.streamingetl.ods.load.bean.TPolicyPrintJobDataLoader;
-import com.transglobe.streamingetl.ods.load.bean.TProductCommisionDataLoader;
-import com.transglobe.streamingetl.ods.load.bean.TProductionDetailDataLoader;
+import com.transglobe.streamingetl.ods.update.bean.JbpmVariableinstanceUpdateDataLoader;
 import com.transglobe.streamingetl.ods.update.bean.TCommisionFeeUpdateDataLoader;
+import com.transglobe.streamingetl.ods.update.bean.TContractExtendCxUpdateDataLoader;
+import com.transglobe.streamingetl.ods.update.bean.TContractExtendLogUpdateDataLoader;
+import com.transglobe.streamingetl.ods.update.bean.TContractProductLogUpdateDataLoader;
+import com.transglobe.streamingetl.ods.update.bean.TImageUpdateDataLoader;
+import com.transglobe.streamingetl.ods.update.bean.TPolicyChangeUpdateDataLoader;
+import com.transglobe.streamingetl.ods.update.bean.TPolicyPrintJobUpdateDataLoader;
+import com.transglobe.streamingetl.ods.update.bean.TProductCommisionUpdateDataLoader;
+import com.transglobe.streamingetl.ods.update.bean.TProductionDetailUpdateDataLoader;
 import com.transglobe.streamingetl.ods.update.bean.UpdateDataLoader;
 
 /**
@@ -59,23 +57,23 @@ public class UpdateDataApp {
 			if (StringUtils.equals(config.sourceTableTCommisionFee, tableName)) {
 				dataloader = new TCommisionFeeUpdateDataLoader(config, fromUpdateTime, toUpdateTime);
 			} else if (StringUtils.equals(config.sourceTableTContractExtendCx, tableName)) {
-//				dataloader = new TContractExtendCxDataLoader(config, dataDate);
+				dataloader = new TContractExtendCxUpdateDataLoader(config, fromUpdateTime, toUpdateTime);
 			} else if (StringUtils.equals(config.sourceTableTContractExtendLog, tableName)) {
-//				dataloader = new TContractExtendLogDataLoader(config, dataDate);
+				dataloader = new TContractExtendLogUpdateDataLoader(config, fromUpdateTime, toUpdateTime);
 			}  else if (StringUtils.equals(config.sourceTableTContractProductLog, tableName)) {
-//				dataloader = new TContractProductLogDataLoader(config, dataDate);
+				dataloader = new TContractProductLogUpdateDataLoader(config, fromUpdateTime, toUpdateTime);
 			} else if (StringUtils.equals(config.sourceTableTImage, tableName)) {
-//				dataloader = new TImageDataLoader(config, dataDate);
+				dataloader = new TImageUpdateDataLoader(config, fromUpdateTime, toUpdateTime);
 			} else if (StringUtils.equals(config.sourceTableJbpmVariableinstance, tableName)) {
-//				dataloader = new JbpmVariableinstanceDataLoader(config, dataDate);
+				dataloader = new JbpmVariableinstanceUpdateDataLoader(config, fromUpdateTime, toUpdateTime);
 			} else if (StringUtils.equals(config.sourceTableTPolicyChange, tableName)) {
-//				dataloader = new TPolicyChangeDataLoader(config, dataDate);
+				dataloader = new TPolicyChangeUpdateDataLoader(config, fromUpdateTime, toUpdateTime);
 			} else if (StringUtils.equals(config.sourceTableTPolicyPrintJob, tableName)) {
-//				dataloader = new TPolicyPrintJobDataLoader(config, dataDate);
+				dataloader = new TPolicyPrintJobUpdateDataLoader(config, fromUpdateTime, toUpdateTime);
 			} else if (StringUtils.equals(config.sourceTableTProductCommision, tableName)) {
-//				dataloader = new TProductCommisionDataLoader(config, dataDate);
+				dataloader = new TProductCommisionUpdateDataLoader(config, fromUpdateTime, toUpdateTime);
 			} else if (StringUtils.equals(config.sourceTableTProductionDetail, tableName)) {
-//				dataloader = new TProductionDetailDataLoader(config, dataDate);
+				dataloader = new TProductionDetailUpdateDataLoader(config, fromUpdateTime, toUpdateTime);
 			} else {
 				throw new Exception("No table name match:" + tableName);
 			}
