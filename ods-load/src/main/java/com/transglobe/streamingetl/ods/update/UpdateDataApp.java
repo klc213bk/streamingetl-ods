@@ -32,6 +32,8 @@ public class UpdateDataApp {
 	public static void main(String[] args) {
 		logger.info(">>> start run LoadDataApp");
 
+		long t0 = System.currentTimeMillis();
+		
 		String tableName= null;
 		String fromUpdateTime = null;
 		String toUpdateTime = null;
@@ -87,6 +89,10 @@ public class UpdateDataApp {
 			logger.info(">>>  Start to load update data");
 			dataloader.loadData();
 
+			long t1 = System.currentTimeMillis();
+			
+			logger.info ("update data span={}", (t1 - t0));
+			
 //			logger.info(">>>  Start: check source and sink data count");
 //			long sourceCnt = dataloader.getSourceRecordsCount();
 //			long sinkCnt = dataloader.getSinkRecordsCount();

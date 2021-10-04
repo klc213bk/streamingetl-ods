@@ -181,9 +181,7 @@ public abstract class DataLoader {
 					cnt = cntRs.getInt("CNT");
 				}
 				recordCount += cnt;
-				if (recordCount > 10000000) {
-					
-				}
+
 				int j = 0;
 				if (cnt > 0) {
 					if (cnt <= batchCommitSize) {
@@ -293,11 +291,7 @@ public abstract class DataLoader {
 			if (rs != null) rs.close();
 			if (pstmt != null) pstmt.close();
 			if (sourceConn != null) sourceConn.close();
-		}//		try {
-//		if (logminerConnectionPool != null) logminerConnectionPool.close();
-//	} catch (Exception e) {
-//		logger.error("message={}, stack trace={}", e.getMessage(), ExceptionUtils.getStackTrace(e));
-//	}
+		}
 	}
 	public long getSinkRecordsCount() throws SQLException {
 		String sinkTableName = getSinkTableName();
@@ -328,7 +322,7 @@ public abstract class DataLoader {
 			if (sinkConn != null) sinkConn.close();
 		}
 	}
-	private void loadData(LoadBean loadBean) throws Exception {
+	protected void loadData(LoadBean loadBean) throws Exception {
 
 		transferData(loadBean, sourceConnectionPool, sinkConnectionPool);
 
@@ -363,7 +357,7 @@ public abstract class DataLoader {
 		}
 
 	}
-	private Long getMinId(String minSql) throws SQLException {
+	protected Long getMinId(String minSql) throws SQLException {
 		Connection sourceConn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -383,7 +377,7 @@ public abstract class DataLoader {
 		}
 
 	}
-	private Long getMaxId(String maxSql) throws SQLException {
+	protected Long getMaxId(String maxSql) throws SQLException {
 		Connection sourceConn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;

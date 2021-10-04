@@ -110,11 +110,10 @@ public class TProductionDetailUpdateDataLoader extends UpdateDataLoader {
 				+ ",CONVERSION_CATE"
 				+ ",ORDER_ID"
 				+ ",ASSIGN_RATE"
-				+ ",ACCEPT_ID"
 				+ ",ORA_ROWSCN"
 				+ ",ROWID"
 				+ " from " + this.sourceTableName
-				+ " a where ? <= a.JOB_ID and a.JOB_ID < ? and to_date(?, 'YYYY-MM-DD') <= UPDATE_TIME and UPDATE_TIME < to_date(?, 'YYYY-MM-DD')";
+				+ " a where ? <= a.DETAIL_ID and a.DETAIL_ID < ? and to_date(?, 'YYYY-MM-DD') <= UPDATE_TIME and UPDATE_TIME < to_date(?, 'YYYY-MM-DD')";
 	}
 
 	@Override
@@ -166,12 +165,11 @@ public class TProductionDetailUpdateDataLoader extends UpdateDataLoader {
 				+ ",CONVERSION_CATE"
 				+ ",ORDER_ID"
 				+ ",ASSIGN_RATE"
-				+ ",ACCEPT_ID"
 				+ ",SCN"		// new column
 				+ ",ROW_ID)"	// new column
 				+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
 				+ ",?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
-				+ ",?,?,?,?,?,?,?,?,?)";
+				+ ",?,?,?,?,?,?,?,?)";
 
 	}
 
@@ -255,10 +253,9 @@ sinkPstmt.setLong(1, rs.getLong("DETAIL_ID"));
 					sinkPstmt.setBigDecimal(44, rs.getBigDecimal("CONVERSION_CATE"));
 					sinkPstmt.setBigDecimal(45, rs.getBigDecimal("ORDER_ID"));
 					sinkPstmt.setBigDecimal(46, rs.getBigDecimal("ASSIGN_RATE"));
-					sinkPstmt.setBigDecimal(47, rs.getBigDecimal("ACCEPT_ID"));
-
-					sinkPstmt.setLong(48, rs.getLong("ORA_ROWSCN"));				// new column
-					sinkPstmt.setString(49,  rs.getString("ROWID"));		// new column
+					
+					sinkPstmt.setLong(47, rs.getLong("ORA_ROWSCN"));				// new column
+					sinkPstmt.setString(48,  rs.getString("ROWID"));		// new column
 					
 					sinkPstmt.addBatch();
 

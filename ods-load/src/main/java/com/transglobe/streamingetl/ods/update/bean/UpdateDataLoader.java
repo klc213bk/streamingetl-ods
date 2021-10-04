@@ -26,6 +26,7 @@ import com.transglobe.streamingetl.common.util.OracleUtils;
 import com.transglobe.streamingetl.common.util.StreamingEtlUtils;
 import com.transglobe.streamingetl.ods.load.Config;
 import com.transglobe.streamingetl.ods.load.bean.DataLoader;
+import com.transglobe.streamingetl.ods.load.bean.LoadBean;
 
 public abstract class UpdateDataLoader extends DataLoader {
 	private static final Logger logger = LoggerFactory.getLogger(UpdateDataLoader.class);
@@ -82,7 +83,130 @@ public abstract class UpdateDataLoader extends DataLoader {
 			}
 		}
 	}
+	public void loadData() throws Exception {
+		String selectMinIdSql = getSelectMinIdSql();
+		String selectMaxIdSql = getSelectMaxIdSql();
+		String countSql = getCountSql();
+		String sourceTableName = getSourceTableName();
+		Long minId = getMinId(selectMinIdSql);
+		Long maxId = getMaxId(selectMaxIdSql);
 
+		Connection sourceConn = null;
+//		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		ExecutorService executor = null;
+
+		long t0 = 0L;
+		long t1 = 0L;
+		try {
+			t0 = System.currentTimeMillis();
+
+			executor = Executors.newFixedThreadPool(threads);
+
+			long stepSize = 1000000L;
+			long startIndex = minId;
+
+			sourceConn=  getSourceConnection();
+//			pstmt = sourceConn.prepareStatement(countSql);
+//			ResultSet cntRs = null;
+			List<LoadBean> loadBeanList = new ArrayList<>();
+			long recordCount = 0L;
+			long endIndex = 0L;
+			do {
+				endIndex = startIndex + stepSize;
+//				pstmt.setLong(1, startIndex);
+//				pstmt.setLong(2, endIndex);
+//				cntRs = pstmt.executeQuery();
+//				Integer cnt = 0;
+//				if (cntRs.next()) {
+//					cnt = cntRs.getInt("CNT");
+//				}
+//				recordCount += cnt;
+
+				int j = 0;
+//				if (cnt > 0) {
+//					if (cnt <= batchCommitSize) {
+						LoadBean loadBean = new LoadBean();			
+						loadBean.startSeq = startIndex;
+						loadBean.endSeq = endIndex;
+						
+						loadBeanList.add(loadBean);
+
+						j++;
+//					} else {
+//
+//						while (true) {
+//							LoadBean loadBean = new LoadBean();
+//							loadBean.startSeq = startIndex + j * subStepSize;
+//							loadBean.endSeq = startIndex + (j + 1) * subStepSize;
+//							
+//							loadBeanList.add(loadBean);
+//
+//							j++;
+//
+//							if (loadBean.endSeq == endIndex) {
+//								break;
+//							}
+//						}
+//					}
+//				}
+				logger.info("count src table={}, startIndex= {}, endIndex={}, loadbeans={}", sourceTableName, startIndex, endIndex, j);
+
+				startIndex = endIndex;
+			} while (endIndex <= maxId);
+
+			for (int k = 0; k < loadBeanList.size(); k++) {
+				LoadBean loadBean = loadBeanList.get(k);
+				loadBean.seq = (k+1);
+				loadBean.tableName = sourceTableName;
+				loadBean.loadBeanSize = loadBeanList.size();
+				loadBean.startTime = System.currentTimeMillis();
+		
+			}
+
+			t1 = System.currentTimeMillis();
+			logger.info("src table={}, minId={}, maxId={}, loadbean size={}, recordCount={}, beforeLoadSpan={}", sourceTableName, minId, maxId, loadBeanList.size(), recordCount, (t1-t0));
+
+			List<LoadBean> runList = null;
+			
+			int runStartIndex = 0;
+			int runEndIndex = 0;
+			int runBatchSize = 10000;
+			while (runEndIndex < loadBeanList.size()) {
+				runEndIndex = runStartIndex + runBatchSize;
+				if (runEndIndex >= loadBeanList.size()) {
+					runEndIndex = loadBeanList.size();
+				}  
+				logger.info(">>> runStartIndex={}, runEndIndex={}", runStartIndex, runEndIndex);
+				runList = loadBeanList.subList(runStartIndex, runEndIndex);
+				List<CompletableFuture<LoadBean>> futures = 
+						runList.stream().map(t -> CompletableFuture.supplyAsync(() -> 
+						{
+							try {
+								loadData(t);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								logger.info("error message={}, trace={}", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e));
+							}
+							return t;
+						}))
+						.collect(Collectors.toList());
+				
+				List<LoadBean> result = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
+
+				runStartIndex = runEndIndex;
+			}
+
+		} finally {
+			if (executor != null) executor.shutdown();
+
+			if (rs != null) rs.close();
+//			if (pstmt != null) pstmt.close();
+			if (sourceConn != null) sourceConn.close();
+		}
+
+	}
 	@Override
 	protected String getSinkTableName() {
 		return null;

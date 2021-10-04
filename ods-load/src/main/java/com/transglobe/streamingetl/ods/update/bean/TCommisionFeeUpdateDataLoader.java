@@ -22,9 +22,9 @@ public class TCommisionFeeUpdateDataLoader extends UpdateDataLoader {
 
 	private static final Logger logger = LoggerFactory.getLogger(TCommisionFeeUpdateDataLoader.class);
 
-	private static final String UPDATE_TABLE_NAME = "T_CONTRACT_EXTEND_CX_UPDATE";
+	private static final String UPDATE_TABLE_NAME = "T_COMMISION_FEE_UPDATE";
 	
-	private static final String UPDATE_TABLE_CREATE_FILE_NAME = "update/createtable-T_CONTRACT_EXTEND_CX_UPDATE.sql";
+	private static final String UPDATE_TABLE_CREATE_FILE_NAME = "update/createtable-T_COMMISION_FEE_UPDATE.sql";
 	
 	private String sourceTableName ;
 
@@ -36,7 +36,7 @@ public class TCommisionFeeUpdateDataLoader extends UpdateDataLoader {
 
 		super(config, fromUpdateTime, toUpdateTime);
 
-		this.sourceTableName = config.sourceTableTContractExtendCx;
+		this.sourceTableName = config.sourceTableTCommisionFee;
 		this.fromUpdateTime = fromUpdateTime;
 		this.toUpdateTime = toUpdateTime;
 	}

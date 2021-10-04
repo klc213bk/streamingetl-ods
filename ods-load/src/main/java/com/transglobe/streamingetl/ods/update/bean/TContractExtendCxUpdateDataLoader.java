@@ -48,17 +48,17 @@ public class TContractExtendCxUpdateDataLoader extends UpdateDataLoader {
 
 	@Override
 	protected String getSelectMinIdSql() {
-		return "select min(LOG_ID) as MIN_ID from " + this.sourceTableName;
+		return "select min(POLICY_CHG_ID) as MIN_ID from " + this.sourceTableName;
 	}
 
 	@Override
 	protected String getSelectMaxIdSql() {
-		return "select max(LOG_ID) as MAX_ID from " + this.sourceTableName;
+		return "select max(POLICY_CHG_ID) as MAX_ID from " + this.sourceTableName;
 	}
 
 	@Override
 	protected String getCountSql() {
-		return "select count(*) as CNT from " + this.sourceTableName + " a where ? <= a.LOG_ID and a.LOG_ID < ?";
+		return "select count(*) as CNT from " + this.sourceTableName + " a where ? <= a.POLICY_CHG_ID and a.POLICY_CHG_ID < ?";
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class TContractExtendCxUpdateDataLoader extends UpdateDataLoader {
 				+ ",ORA_ROWSCN"
 				+ ",ROWID"
 				+ " from " + this.sourceTableName
-				+ " a where ? <= a.LOG_ID and a.LOG_ID < ? and to_date(?, 'YYYY-MM-DD') <= UPDATE_TIME and UPDATE_TIME < to_date(?, 'YYYY-MM-DD')";
+				+ " a where ? <= a.POLICY_CHG_ID and a.POLICY_CHG_ID < ? and to_date(?, 'YYYY-MM-DD') <= UPDATE_TIME and UPDATE_TIME < to_date(?, 'YYYY-MM-DD')";
 	}
 
 	@Override
